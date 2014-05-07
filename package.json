@@ -1,0 +1,23 @@
+{
+	"name": "mason",
+	"license": "WTFPL",
+	"private": true,
+	"version": "0.0.0",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/andy-hanson/mason"
+	},
+	"dependencies": {},
+	"devDependencies": {
+		"grunt": "0.4.4",
+		"grunt-cli": "0.1.13",
+		"grunt-codo": "0.1.0",
+		"grunt-coffeelint": "0.0.x",
+		"grunt-contrib-clean": "0.5.0",
+		"grunt-contrib-coffee": "0.10.x",
+		"load-grunt-tasks": "0.4.0"
+	},
+	"engines": {
+		"node": "0.11.x"
+	}
+}

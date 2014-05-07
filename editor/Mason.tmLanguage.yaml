@@ -1,0 +1,84 @@
+# [PackageDev] target_format: plist, ext: tmLanguage
+name: Mason
+scopeName: source.mason
+fileTypes:
+- mason
+uuid: 857c9cc3-2862-4a05-87e7-c7f90f51f1a7
+
+# I keep using this pattern:
+# [^\.\s\(\)\[\]\"\\]*
+# For names. Don't change it just once, change it everywhere!
+
+patterns:
+
+- name: comment
+  match: \\.*
+
+- name: constant.numeric
+  match: \d+(\.\d+)*
+
+- name: variable
+  comment: Local assignment
+  match: ^([^:]*)(:)?(.*)?\s(=)
+  captures:
+    '2':
+      name: comment
+    '3':
+      name: support.type
+    '4':
+      name: comment
+
+- name: storage
+  comment: Object assignment
+  match: ^([^:.]*)(:)?([^.]*)?(\.)
+  captures:
+    '2':
+      name: comment
+    '3':
+      name: support.type
+    '4':
+      name: comment
+
+
+- name: variable.parameter
+  begin: (\|)
+  beginCaptures:
+    '1':
+      name: local.define.dot
+  end: \n
+  patterns:
+    - name: support.type
+      match: (\:)\S+
+      captures:
+        '1':
+          name: comment
+    - name: comment
+      match: \\.*
+
+
+
+# Empty string
+- name: string
+  match: \"\"
+# Multi-line string
+- name: string
+  begin: \"\n
+  end: ^$ # on blank line
+  patterns:
+  - name: variable
+    match: \{[^\}]*\}
+# Single-line string
+- name: string
+  begin: \"
+  end: \"
+  patterns:
+  - name: variable
+    match: \{[^\}]*\}
+
+- name: keyword
+  match: \bit\b
+
+
+
+- name: keyword
+  match: "[\\(\\[\\{\\}\\]\\)]"

@@ -1,0 +1,22 @@
+\ comment
+
+123.45
+
+pi:Number = 3.14
+pi:Number. 3.14
+
+|:Number x:Number \ a function
+	+ x 3
+
+
+""
+"One plus one is {1 + 1}!"
+"
+	It's still {1 + 1}...
+
+it
+
+x:Type
+
+
+
