@@ -1,3 +1,4 @@
+{ okMemberName } = require '../compile-help/JavaScript-syntax'
 Pos = require '../compile-help/Pos'
 { type } = require '../help/check'
 Expression = require './Expression'
@@ -7,4 +8,10 @@ module.exports = class Member extends Expression
 		type @_pos, Pos, @_object, Expression, @_memberName, String
 
 	compile: (context) ->
-		[ (@_object.toNode context), '.', @_memberName ]
+		object =
+			@_object.toNode context
+
+		if okMemberName @_memberName
+			[ object, '.', @_memberName ]
+		else
+			[ object, '["', @_memberName, '"]' ]

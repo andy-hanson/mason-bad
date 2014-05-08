@@ -8,6 +8,8 @@ module.exports =
 	Member: require './Member'
 	Null: require './Null'
 	JS: require './JS'
+	LocalAccess: require './LocalAccess'
 	Quote: require './Quote'
+	Use: require './Use'
 
 

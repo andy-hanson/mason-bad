@@ -1,11 +1,27 @@
+Pos = require '../compile-help/Pos'
 T = require '../Token'
 Stream = require './Stream'
 GroupPre = require './GroupPre'
 lexQuote = require './lexQuote'
 { cFail, cCheck } = require '../compile-help/check'
-{ char } = require '../compile-help/language'
+{ char, keywords } = require '../compile-help/language'
 { type } = require '../help/check'
-{ isEmpty, last, repeat } = require '../help/list'
+{ dropWhile, isEmpty, last, repeat } = require '../help/list'
+
+
+###
+@todo Destructuring assignment use, eg "use control for if"
+###
+parseUse = (pos, str) ->
+	type pos, Pos, str, String
+
+	parts = str.split '.'
+	realParts = dropWhile parts, (part) ->
+		part == ''
+	nLevelsUp = parts.length - realParts.length
+
+	new T.Use pos, nLevelsUp, realParts
+
 
 ###
 BLAH BLAH
@@ -14,7 +30,7 @@ module.exports = tokenize = (stream, inQuoteInterpolation = no) ->
 	type stream, Stream, inQuoteInterpolation, Boolean
 
 	removePrecedingNewLine = ->
-		if (T.special '\n') last out
+		if (T.keyword '\n') last out
 			out.pop()
 
 	# returns String
@@ -54,11 +70,11 @@ module.exports = tokenize = (stream, inQuoteInterpolation = no) ->
 
 				when ch == '.' and (stream.peek 1) == ' '
 					stream.skip 2
-					new T.Special pos, '. '
+					new T.Keyword pos, '. '
 
 				when ch == '='
 					stream.skip()
-					new T.Special pos, '='
+					new T.Keyword pos, '='
 
 				when maybeTake char.precedesName
 					kind = "#{ch}x"
@@ -68,7 +84,12 @@ module.exports = tokenize = (stream, inQuoteInterpolation = no) ->
 
 				when match char.name
 					name = takeName()
-					new T.Name pos, name, 'x'
+					if name == 'use'
+						parseUse stream.pos(), (stream.takeUpTo /\n/).trim()
+					else if name in keywords
+						new T.Keyword stream.pos(), name
+					else
+						new T.Name pos, name, 'x'
 
 				when maybeTake /\|/
 					removePrecedingNewLine()
@@ -93,11 +114,11 @@ module.exports = tokenize = (stream, inQuoteInterpolation = no) ->
 					indent = now
 					if now == old
 						removePrecedingNewLine()
-						new T.Special pos, '\n'
+						new T.Keyword pos, '\n'
 					else if now < old
 						removePrecedingNewLine()
 						x = repeat (old - now), new GroupPre stream.pos(), '←'
-						x.push new T.Special stream.pos(), '\n'
+						x.push new T.Keyword stream.pos(), '\n'
 						x
 					else if now == old + 1
 						new GroupPre stream.pos(), '→'
@@ -106,8 +127,6 @@ module.exports = tokenize = (stream, inQuoteInterpolation = no) ->
 
 				when maybeTake /"/
 					lexQuote stream, indent
-
-				when maybeTake /"/
 
 				else
 					cFail pos, "Unrecognized character '#{ch}'"

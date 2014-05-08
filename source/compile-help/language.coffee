@@ -26,17 +26,8 @@ Character classes used during tokenization.
 	precedesName:
 		/[:@\.]/
 	name:
-		/[a-zA-Z]/
-
-	#precedesName:
-	#	/[_:@'\.]/
-	# Not _, space, bracket, punc, quote, \, |, @, :, or dot.
-	#name:
-	#	/[^_\s\(\[\{\)\]\};,'"`\\\|@\:\.]/
-	# Like nameChar but can include dot.
-	#used:
-	#	/[^\s\(\[\{\)\]\};,'"`\\\|@\:]/
-
+		# If it's not used for anything else, it's a valid name!
+		/[^\s\(\)\[\]\{\};,'"`\\\|@:.]/
 
 
 ###
@@ -54,6 +45,11 @@ Maps group openers to closers.
 @nameKinds =
 	[ 'x', '.x', '@x', ':x' ]
 
-@keywords =
-	special:
-		[ '=', '. ', '|', '\n' ]
+@keywords = [
+	'use',
+	'for',
+	'=',
+	'. ',
+	'|',
+	'\n'
+]

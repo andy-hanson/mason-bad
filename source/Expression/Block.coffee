@@ -1,5 +1,5 @@
 { typeEach } = require '../help/check'
-{ interleave, interleavePlus, isEmpty } = require '../help/list'
+{ interleave, interleavePlus, isEmpty, last } = require '../help/list'
 Expression = require './Expression'
 
 genObjectLiteral = (keys, indent) ->
@@ -19,6 +19,9 @@ module.exports = class Block extends Expression
 		typeEach @_lines, Expression
 		typeEach @_keys, String
 
+	pure: ->
+		no
+
 	compile: (context) ->
 		lines =
 			for line in @_lines
@@ -30,7 +33,10 @@ module.exports = class Block extends Expression
 		unless isEmpty @_keys
 			lines.push genObjectLiteral @_keys, newIndent
 
-		lines[lines.length - 1] = [ 'return ', lines[lines.length - 1] ]
+		if (last @_lines).pure()
+			lines[lines.length - 1] = [ 'return ', lines[lines.length - 1] ]
+		else
+			lines.push 'return null'
 
 		x = interleave lines, [ ';\n', newIndent ]
 

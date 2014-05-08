@@ -9,8 +9,7 @@ one .two @three :four 5 -6.789
 '''
 
 str2 = '''
-log 3
-
+use ..mod
 '''
 
 tokens = lex str2
@@ -20,5 +19,5 @@ for token in tokens
 
 out = compile str2
 
-console.log out
+console.log out.code
 

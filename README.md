@@ -7,4 +7,5 @@ Building
 ---
 
 	npm install; grunt
+	grunt xyz --stack
 

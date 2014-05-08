@@ -1,3 +1,13 @@
+
+@dropWhile = (list, condition) ->
+	idx = 0
+	while idx < list.length
+		unless condition list[idx]
+			break
+		idx += 1
+
+	list.slice idx
+
 ###
 A new list with `interleaved` in between every element of `list`.
 ###

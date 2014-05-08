@@ -1,5 +1,7 @@
-{ abstract, check, type } = require './help/check'
 { nameKinds, keywords } = require './compile-help/language'
+{ abstract, check, type, typeEach } = require './help/check'
+{ last } = require './help/list'
+{ repeated } = require './help/string'
 Pos = require './compile-help/Pos'
 
 class Token
@@ -58,10 +60,10 @@ class Name extends Token
 	show: ->
 		"Name(#{@_text}, #{@_kind})"
 
-class Special extends Token
+class Keyword extends Token
 	constructor: (@_pos, @_kind) ->
 		type @_pos, Pos, @_kind, String
-		check @_kind in keywords.special
+		check @_kind in keywords
 
 	kind: -> @_kind
 
@@ -74,15 +76,44 @@ class Special extends Token
 		"<#{x}>"
 
 
+class Use extends Token
+	constructor: (@_pos, @_nLeadingDots, @_parts) ->
+		type @_nLeadingDots, Number
+		typeEach @_parts, String
+		console.log @_parts
+		check @_parts.length == 1, "Destructuring use is TODO"
+
+	localName: ->
+		last @_parts
+
+	path: ->
+		prefix =
+			switch @_nLeadingDots
+				when 0
+					''
+				when 1
+					'./'
+				else
+					repeated '../', @_nLeadingDots - 1
+
+		prefix + @_parts[0]
+
+	show: ->
+		"use #{@path()}" ##{@_nLeadingDots}|#{@_parts}"
+
+
 module.exports =
 	Group: Group
-	Name: Name
+	Keyword: Keyword
 	Literal: Literal
-	StringLiteral: StringLiteral
+	Name: Name
 	NumberLiteral: NumberLiteral
-	Special: Special
+	StringLiteral: StringLiteral
 	Token: Token
-	special: (kind) -> (token) ->
-		token instanceof Special and token.kind() == kind
+	Use: Use
+
+	keyword: (kind) -> (token) ->
+		token instanceof Keyword and token.kind() == kind
+
 	dotName: (token) ->
 		token instanceof Name and token.kind() == '.x'

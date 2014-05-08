@@ -1,6 +1,6 @@
 (function() {
   module.exports = {
-    plus: function(x, y) {
+    '+': function(x, y) {
       return x + y;
     }
   };

@@ -25,7 +25,7 @@ class Parser
 			new E.Null @_pos
 		else
 			lines =
-				splitWhere tokens, T.special '\n'
+				splitWhere tokens, T.keyword '\n'
 			lineExprs = []
 			allKeys = []
 			lines.forEach (line) =>
@@ -88,7 +88,7 @@ class Parser
 		# It may be an assignment or plain expression.
 
 		isAssign = (x) ->
-			((T.special '=') x) or (T.special '. ') x
+			((T.keyword '=') x) or (T.keyword '. ') x
 
 		if (x = trySplitOnceWhere tokens, isAssign)?
 			[ nameTokens, assigner, valueTokens ] = x
@@ -127,7 +127,7 @@ class Parser
 		switch token.constructor
 			when T.Name
 				if token.kind() == 'x'
-					new E.JS token.pos(), token.text()
+					new E.LocalAccess token.pos(), token.text()
 				else
 					fail()
 			when T.Group
@@ -142,6 +142,15 @@ class Parser
 						@quote token.pos(), token.body()
 					else
 						fail()
+
+			when T.Use
+				name =
+					token.localName()
+				use =
+					new E.Use token.pos(), token.path()
+
+				new E.Assign token.pos(), name, null, use
+
 			else
 				if token instanceof T.Literal
 					new E.JS token.pos(), token.toJS()

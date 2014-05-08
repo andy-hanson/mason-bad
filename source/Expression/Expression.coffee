@@ -43,3 +43,6 @@ module.exports = class Expression
 
 	pos: ->
 		@_pos
+
+	pure: ->
+		yes

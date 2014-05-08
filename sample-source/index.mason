@@ -1,4 +1,5 @@
-plus = (require "./math").plus
+use .math
++ = math.+
 x. 3
 y. 4
-console.log "x plus y is {plus x y}"
+console.log "x plus y is {+ x y}"

@@ -2,10 +2,11 @@
 //# sourceMappingURL=index.js.map
 module.exports = function()
 {
-	var plus = require("./math").plus;
+	var math = require("./math");
+	var _43 = math["+"];
 	var x = (3);
 	var y = (4);
-	console.log("x plus y is " + plus(x, y) + "");
+	console.log("x plus y is " + _43(x, y) + "");
 	return {
 		x: x,
 		y: y

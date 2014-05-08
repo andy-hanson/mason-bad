@@ -11,6 +11,10 @@ uuid: 857c9cc3-2862-4a05-87e7-c7f90f51f1a7
 
 patterns:
 
+
+- name: keyword
+  match: \b(use|for)\b
+
 - name: comment
   match: \\.*
 
@@ -74,9 +78,6 @@ patterns:
   patterns:
   - name: variable
     match: \{[^\}]*\}
-
-- name: keyword
-  match: \bit\b
 
 
 
