@@ -65,6 +65,10 @@ module.exports = class Stream
 			else
 				@_pos = @_pos.minusColumn()
 
+	skip: (n = 1) ->
+		times n, =>
+			@readChar()
+
 	###
 	Reads as long as characters satisfy `condition`.
 	@param condition [Function, RegExp]

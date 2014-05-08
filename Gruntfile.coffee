@@ -4,7 +4,8 @@ module.exports = (grunt) ->
 			grunt.file.readJSON 'package.json'
 
 		clean:
-			all: [ 'doc', 'node_modules' ]
+			all: [ 'doc', 'node_modules', 'sample-js' ]
+			sample: 'sample-js'
 
 		codo:
 			options:
@@ -12,11 +13,22 @@ module.exports = (grunt) ->
 				output: 'doc'
 
 		coffee:
+			sample:
+				expand: yes
+				flatten: no
+				cwd: 'sample-source'
+				src: [ '**/*.coffee' ]
+				dest: 'sample-js'
+				ext: '.js'
+
+				bare: yes
+				sourceMap: yes
+
 			dev:
 				expand: yes
-				flatten: yes
+				flatten: no
 				cwd: 'source'
-				src: [ '*.coffee' ]
+				src: [ '**/*.coffee' ]
 				dest: 'js'
 				ext: '.js'
 
@@ -46,10 +58,33 @@ module.exports = (grunt) ->
 				no_trailing_whitespace:
 					level: 'error'
 
+		mason:
+			dev:
+				expand: yes
+				flatten: no
+				cwd: 'sample-source'
+				src: [ '**/*.mason' ]
+				dest: 'sample-js'
+				ext: '.js'
+
+		exec:
+			sample: 'node sample-js'
+
+
+
 	(require 'load-grunt-tasks') grunt
+	# Load the 'mason' task
+	grunt.loadTasks 'tasks'
 
 	grunt.registerTask 'default', [
 		'codo',
 		'coffeelint',
 		'coffee'
+	]
+
+	grunt.registerTask 'xyz', [
+		'clean:sample',
+		'coffee:sample',
+		'mason',
+		'exec:sample'
 	]
