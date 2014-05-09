@@ -1,10 +1,13 @@
-{ cCheck } = require '../compile-help/check'
+{ cCheck, cFail, } = require '../compile-help/check'
 { groupMatch } = require '../compile-help/language'
 { check, type } = require '../help/check'
 { isEmpty, last } = require '../help/list'
 T = require '../Token'
 GroupPre = require './GroupPre'
 
+###
+Squishes matching `GroupPre`s into `Group`s.
+###
 module.exports = joinGroups = (tokens) ->
 	stack = [ ]
 	current = [ ] # Tokens to form this body
@@ -61,7 +64,7 @@ module.exports = joinGroups = (tokens) ->
 
 
 	unless isEmpty opens
-		cFail (last opens).pos(), "Never closed #{opens.last().kind()}"
+		cFail (last opens).pos(), "Never closed #{(last opens).kind()}"
 	check isEmpty stack
 
 	current

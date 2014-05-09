@@ -3,19 +3,26 @@ Pos = require '../compile-help/Pos'
 { type } = require '../help/check'
 Expression = require './Expression'
 
-module.exports = class Assign extends Expression
+###
+Sets a single name to a value. Eg `a = b`.
+###
+module.exports = class AssignSingle extends Expression
+	###
+	@param _pos [Pos]
+	@param _name [String]
+	@param _type [Null]
+	@param _value [Expression]
+	###
 	constructor: (@_pos, @_name, @_type, @_value) ->
 		type @_pos, Pos, @_name, String
 		type @_value, Expression
 
+	# @noDoc
 	pure: ->
 		no
 
-	name: -> @_name
-	type: -> @_type
-	value: -> @_value
-
+	# @noDoc
 	compile: (context) ->
+		val = @_value.toNode context.indented()
 		mangled = mangle @_name
-		[ 'var ', mangled, ' = ', @_value.toNode context ]
-
+		[ 'var ', mangled, ' =\n', context.indent(), '\t', val ]

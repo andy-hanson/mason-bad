@@ -1,0 +1,28 @@
++. |a b
+	`a + b`
+-. |a b
+	`a - b`
+*. |a b
+	`a * b`
+/. |a b
+	`a / b`
+^. |a b
+	Math.pow a b
+log-e. |a
+	Math.log a
+log. |a b
+	/ (log-e a) (log-e b)
+modulo. |a b
+	`a % b`
+^-1. |a
+	/ 1 a
+<. |a b
+	`a < b`
+>. |a b
+	`a > b`
+<=. |a b
+	`a <= b`
+>=. |a b
+	`a >= b`
+
+

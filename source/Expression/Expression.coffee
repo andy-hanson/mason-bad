@@ -8,12 +8,12 @@ Represents the meaning of the source code.
 ###
 module.exports = class Expression
 	###
-	A SourceNode with my @pos,
-	the context's `fileName()`,
-	and the `chunk` of JavaScript code.
+	Wraps compiled code with my source-map info.
 	@param chunk [Chunk]
-	  Chunk = JavaScript code, a SourceNode, or an Array of chunks.
+	  Compiled code.
+	  Chunk = String | SourceNode | Array<Chunk>.
 	@return [SourceNode]
+	  Compiled code annotated with my @pos() and fileName().
 	###
 	nodeWrap: (chunk, context) ->
 		type context, Context
@@ -25,7 +25,7 @@ module.exports = class Expression
 			chunk
 
 	###
-	Return a SourceNode representing this Expression.
+	Return a SourceNode representing this Expression and my source-map info.
 	@return [SourceNode]
 	###
 	toNode: (context) ->
@@ -41,8 +41,15 @@ module.exports = class Expression
 	compile: (context) ->
 		abstract()
 
+	###
+	Where in the file this Expression appeared.
+	###
 	pos: ->
 		@_pos
 
+	###
+	Whether this Expression may appear within another
+	and be returned from functions.
+	###
 	pure: ->
 		yes

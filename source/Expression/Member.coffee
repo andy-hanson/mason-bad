@@ -1,17 +1,26 @@
-{ okMemberName } = require '../compile-help/JavaScript-syntax'
+{ needsMangle } = require '../compile-help/JavaScript-syntax'
 Pos = require '../compile-help/Pos'
 { type } = require '../help/check'
 Expression = require './Expression'
 
+###
+Accesses a member of an object.
+###
 module.exports = class Member extends Expression
-	constructor: (@_pos, @_object, @_memberName) ->
-		type @_pos, Pos, @_object, Expression, @_memberName, String
+	###
+	@param _pos [Pos]
+	@param _object [Expression]
+	@param _member [String]
+	###
+	constructor: (@_pos, @_object, @_member) ->
+		type @_pos, Pos, @_object, Expression, @_member, String
 
+	# @noDoc
 	compile: (context) ->
-		object =
-			@_object.toNode context
+		access =
+			if needsMangle @_member
+				[ '["', @_member, '"]' ]
+			else
+				[ '.', @_member ]
 
-		if okMemberName @_memberName
-			[ object, '.', @_memberName ]
-		else
-			[ object, '["', @_memberName, '"]' ]
+		[ (@_object.toNode context), access ]

@@ -1,0 +1,3 @@
+
+?. |cond then else
+	`cond ? then() : _else()`

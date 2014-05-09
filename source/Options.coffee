@@ -1,4 +1,5 @@
 nopt = require 'nopt'
+{ basename } = require 'path'
 { type } = require './help/check'
 
 ###
@@ -21,18 +22,32 @@ module.exports = class Options
 		@_fileName = options.fileName
 		@_outFileName = options.outFileName
 
-	withFileName: (fileName) ->
-		new Options
-			checks: @checks()
-			fileName: fileName
 
+	#withFileName: (fileName) ->
+	#	new Options
+	#		checks: @checks()
+	#		fileName: fileName
+
+	###
+	@todo
+	###
 	checks: -> @_checks
+
+	###
+	Full path to the file we are compiling.
+	###
 	fileName: -> @_fileName
+
+	###
+	Full path to the destination file.
+	###
 	outFileName: -> @_outFileName
 
+	###
+	Basename of the destination file.
+	###
 	shortOutFileName: ->
-		path = require 'path'
-		path.basename @outFileName()
+		basename @outFileName()
 
 	###
 	Gets Options from this processe's command line.

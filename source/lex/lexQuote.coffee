@@ -6,8 +6,10 @@
 T = require '../Token'
 Stream = require './Stream'
 GroupPre = require './GroupPre'
-# keywords = require '../compile-help/keywords'
 
+###
+Gets the parts of a quote.
+###
 module.exports = lexQuote = (stream, oldIndent) ->
 	type stream, Stream, oldIndent, Number
 

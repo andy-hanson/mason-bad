@@ -1,15 +1,19 @@
+JS = require './JS'
+
 module.exports =
-	Assign: require './Assign'
+	AssignSingle: require './AssignSingle'
+	AssignDestructure: require './AssignDestructure'
 	Block: require './Block'
+	BlockWrap: require './BlockWrap'
 	Call: require './Call'
 	Context: require './Context'
 	Expression: require './Expression'
 	Fun: require './Fun'
 	Member: require './Member'
-	Null: require './Null'
-	JS: require './JS'
+	JS: JS
 	LocalAccess: require './LocalAccess'
 	Quote: require './Quote'
-	Use: require './Use'
+	Require: require './Require'
 
-
+	null: (pos) ->
+		new JS pos, 'null'

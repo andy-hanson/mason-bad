@@ -13,10 +13,12 @@ module.exports = class GroupPre extends T.Token
 	constructor: (@_pos, @_kind) ->
 		null
 
-	pos: -> @_pos
+	###
+	What kind of group this will be.
+	A member of `groupMap` from `../compile-help/language`, or `'"'`.
+	###
 	kind: -> @_kind
 
 	# @noDoc
-	show: ->
-		@_kind
+	show: -> @_kind
 

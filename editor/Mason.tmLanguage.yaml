@@ -13,7 +13,7 @@ patterns:
 
 
 - name: keyword
-  match: \b(use|for)\b
+  match: \b(use|for|case|as)\b
 
 - name: comment
   match: \\.*
@@ -79,7 +79,8 @@ patterns:
   - name: variable
     match: \{[^\}]*\}
 
-
+- name: support.other
+  match: "`.*`"
 
 - name: keyword
   match: "[\\(\\[\\{\\}\\]\\)]"

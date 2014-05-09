@@ -71,7 +71,6 @@ module.exports = (grunt) ->
 			sample: 'node sample-js'
 
 
-
 	(require 'load-grunt-tasks') grunt
 	# Load the 'mason' task
 	grunt.loadTasks 'tasks'
@@ -82,7 +81,7 @@ module.exports = (grunt) ->
 		'coffee'
 	]
 
-	grunt.registerTask 'xyz', [
+	grunt.registerTask 'run-sample', [
 		'clean:sample',
 		'coffee:sample',
 		'mason',

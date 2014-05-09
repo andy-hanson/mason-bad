@@ -1,5 +1,5 @@
+rgx = (require 'xregexp').XRegExp
 StringMap = require '../help/StringMap'
-
 
 ###
 Maps escapes to what they represent.
@@ -16,19 +16,24 @@ Character classes used during tokenization.
 ###
 @char =
 	digit:
-		/[0-9]/
+		rgx /[0-9]/
 	number:
-		/[0-9\.]/
+		rgx /[0-9\.]/
 	groupPre:
-		/[\(\)]/
+		rgx /[\(\)]/
 	space:
-		RegExp ' '
+		rgx ' '
 	precedesName:
-		/[:@\.]/
+		rgx /[:@\.]/
 	name:
 		# If it's not used for anything else, it's a valid name!
-		/[^\s\(\)\[\]\{\};,'"`\\\|@:.]/
+		rgx /[^\s\(\)\[\]\{\};,'"`\\\|@:.]/
 
+###
+Every kind a `Group` can have.
+###
+@groupKinds =
+	[ '(', '→', '"', '|' ]
 
 ###
 Maps group openers to closers.

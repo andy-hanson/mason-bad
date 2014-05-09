@@ -1,3 +1,20 @@
+###
+Any errors have their message prepended by the result of `annotate`.
+@param mayThrow [-> ()]
+  Block of code that may fail.
+@param annotate [-> String]
+  Called when `mayThrow` throws. Returns text to prepend to the error message.
+###
+@annotateErrors = (mayThrow, annotate) ->
+	exports.type mayThrow, Function, annotate, Function
+
+	try
+		mayThrow()
+	catch error
+		error.message = "#{annotate()}: #{error.message}"
+		throw error
+
+
 # @noDoc
 typeIt = (args, mustExist) ->
 	i = 0

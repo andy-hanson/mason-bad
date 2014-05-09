@@ -52,6 +52,15 @@ module.exports = class Stream
 		@index += 1
 		x
 
+
+	###
+	Goes forward `n` characters.
+	@param n [Number]
+	###
+	skip: (n = 1) ->
+		times n, =>
+			@readChar()
+
 	###
 	Goes back `n` characters.
 	(If it goes back a line, column info is destroyed,
@@ -65,9 +74,6 @@ module.exports = class Stream
 			else
 				@_pos = @_pos.minusColumn()
 
-	skip: (n = 1) ->
-		times n, =>
-			@readChar()
 
 	###
 	Reads as long as characters satisfy `condition`.

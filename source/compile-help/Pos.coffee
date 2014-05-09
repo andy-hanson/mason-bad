@@ -11,8 +11,16 @@ module.exports = class Pos
 		type @_line, Number, @_column, Number
 		Object.freeze @
 
+	###
+	Which line of the source file.
+	@return [Number]
+	###
 	line: -> @_line
 
+	###
+	Which character of the line.
+	@return [Number]
+	###
 	column: -> @_column
 
 	# @return [Pos] One line down and at column 1.

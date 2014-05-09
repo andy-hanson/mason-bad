@@ -1,5 +1,12 @@
-use .math
-+ = math.+
-x. 3
-y. 4
-console.log "x plus y is {+ x y}"
+use .arithmetic for + - * / <
+use .control for ?
+log = console.log
+
+factorial = |a
+	? (< a 2) |
+		1
+	|
+		* a (factorial (- a 1))
+
+log "4! is {factorial 4}"
+

@@ -1,3 +1,4 @@
+rgx = (require 'xregexp').XRegExp
 { type } = require '../help/check'
 
 # <developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Reserved_Words>
@@ -68,19 +69,25 @@ javaScriptKeywords =
 	""".split '\n'
 
 illegalJavaScriptNameChar =
-	/[^a-zA-Z]/g
-
-@okMemberName = (name) ->
-	type name, String
-
-	Array.prototype.every.call name, (ch) ->
-		not illegalJavaScriptNameChar.test name
+	rgx /[^a-zA-Z]/g
 
 ###
-Generates a valid JavaScript local name from a Smith one.
-These names use `_` as an escape character,
-	which is why Smith local names can't contain `_`.
-@return [String]
+False if `name` will pass as a regular JavaScript variable name.
+@param name [String]
+@return [Boolean]
+###
+@needsMangle = (name) ->
+	type name, String
+
+	ans = Array.prototype.some.call name, (ch) ->
+		illegalJavaScriptNameChar.xtest ch
+
+	ans
+
+###
+Generates a valid JavaScript local name from a Mason one.
+These names use `_` as an escape character.
+@return [String]_
 ###
 @mangle = (name) ->
 	type name, String

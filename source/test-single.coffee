@@ -9,15 +9,12 @@ one .two @three :four 5 -6.789
 '''
 
 str2 = '''
-use ..mod
+?. |cond then else
+	`cond ? then() : else()`
 '''
 
-tokens = lex str2
-
-for token in tokens
-	console.log token.toString()
-
-out = compile str2
+out =
+	compile str2
 
 console.log out.code
 

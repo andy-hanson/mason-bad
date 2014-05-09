@@ -8,23 +8,26 @@ lexQuote = require './lexQuote'
 { type } = require '../help/check'
 { dropWhile, isEmpty, last, repeat } = require '../help/list'
 
-
 ###
-@todo Destructuring assignment use, eg "use control for if"
+Gets a `Use` token out of a string.
+@return [Use]
 ###
-parseUse = (pos, str) ->
+tokenizeUse = (pos, str) ->
 	type pos, Pos, str, String
 
-	parts = str.split '.'
-	realParts = dropWhile parts, (part) ->
-		part == ''
-	nLevelsUp = parts.length - realParts.length
+	parts =
+		str.split '.'
+	realParts =
+		dropWhile parts, (part) ->
+			part == ''
+	nLevelsUp =
+		parts.length - realParts.length
 
 	new T.Use pos, nLevelsUp, realParts
 
 
 ###
-BLAH BLAH
+Converts a string into tokens, including `GroupPre`s.
 ###
 module.exports = tokenize = (stream, inQuoteInterpolation = no) ->
 	type stream, Stream, inQuoteInterpolation, Boolean
@@ -35,7 +38,7 @@ module.exports = tokenize = (stream, inQuoteInterpolation = no) ->
 
 	# returns String
 	takeName = ->
-		cCheck not (char.digit.test stream.peek()), stream.pos(),
+		cCheck not (char.digit.xtest stream.peek()), stream.pos(),
 			'Expected name, got number'
 		name = stream.takeWhile char.name
 		cCheck not (isEmpty name), stream.pos(),
@@ -54,13 +57,13 @@ module.exports = tokenize = (stream, inQuoteInterpolation = no) ->
 			return out
 
 		match = (regex) ->
-			regex.test ch
+			regex.xtest ch
 		maybeTake = (regex) ->
 			stream.maybeTake regex
 
 		token =
 			switch
-				when (match char.digit) or (ch == '-' and char.digit.test stream.peek 1)
+				when (match char.digit) or (ch == '-' and char.digit.xtest stream.peek 1)
 					first = stream.readChar()
 					num = stream.takeWhile char.number
 					new T.NumberLiteral pos, "#{first}#{num}"
@@ -85,7 +88,8 @@ module.exports = tokenize = (stream, inQuoteInterpolation = no) ->
 				when match char.name
 					name = takeName()
 					if name == 'use'
-						parseUse stream.pos(), (stream.takeUpTo /\n/).trim()
+						stream.takeWhile /[ ]/
+						tokenizeUse stream.pos(), (stream.takeUpTo /\s/).trim()
 					else if name in keywords
 						new T.Keyword stream.pos(), name
 					else
@@ -127,6 +131,12 @@ module.exports = tokenize = (stream, inQuoteInterpolation = no) ->
 
 				when maybeTake /"/
 					lexQuote stream, indent
+
+				when maybeTake /`/
+					pos = stream.pos()
+					text = stream.takeUpTo /`/
+					stream.skip()
+					new T.JSLiteral pos, text
 
 				else
 					cFail pos, "Unrecognized character '#{ch}'"

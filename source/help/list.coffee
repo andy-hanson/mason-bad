@@ -1,4 +1,9 @@
-
+###
+Drops elements of the list satisfying `condition`.
+@param list [Array]
+@param condition [-> Boolean]
+  Values satisfying this are not kept.
+###
 @dropWhile = (list, condition) ->
 	idx = 0
 	while idx < list.length
@@ -43,6 +48,19 @@ A list of `times` `value`s.
 @repeat = (times, value) ->
 	[1..times].map ->
 		value
+
+###
+Every element but the last.
+###
+@rightTail = (list) ->
+	list.slice 0, list.length - 1
+
+###
+Everything but the last element, and the last element.
+@return [(Array, Object)]
+###
+@rightUnCons = (list) ->
+	[ (exports.rightTail list), exports.last list ]
 
 ###
 Breaks `list` by elements where `condition`.

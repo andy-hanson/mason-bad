@@ -1,4 +1,5 @@
-use math for +
+use arithmetic for +
+use graceful-fs as fs
 
 \ comment
 
@@ -20,5 +21,12 @@ it
 
 x:Type
 
+p = Pair 1 2
+
+case p
+	as Pair x y
+		log x y
+	as Number
+		log p
 
 

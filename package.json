@@ -9,13 +9,12 @@
 	},
 	"dependencies": {
 		"chalk": "0.4.x",
-		"graceful-fs": "2.0.x",
 		"nopt": "2.2.x",
 		"source-map": "0.1.x",
-		"wrench": "1.5.x"
+		"wrench": "1.5.x",
+		"xregexp": "2.0.x"
 	},
 	"devDependencies": {
-		"grunt": "0.4.x",
 		"grunt-cli": "0.1.13",
 		"grunt-codo": "0.1.0",
 		"grunt-coffeelint": "0.0.x",
@@ -23,6 +22,9 @@
 		"grunt-contrib-coffee": "0.10.x",
 		"grunt-exec": "0.4.x",
 		"load-grunt-tasks": "0.4.0"
+	},
+	"peerDependencies": {
+		"grunt": "0.4.x"
 	},
 	"engines": {
 		"node": "0.11.x"
