@@ -1,6 +1,6 @@
 { cCheck, cFail } = require './compile-help/check'
 { check, type, typeEach } = require './help/check'
-{ isEmpty, rightUnCons, splitWhere, trySplitOnceWhere, unCons } =
+{ isEmpty, last, rightUnCons, splitWhere, tail, trySplitOnceWhere, unCons } =
 	require './help/list'
 E = require './Expression'
 Pos = require './compile-help/Pos'
@@ -12,7 +12,7 @@ The Parser is a class so that it can keep the @_pos as data while running.
 ###
 class Parser
 	###
-	Makes a new Parser.
+	Makes a new Parser at the beginning of the file.
 	###
 	constructor: ->
 		@_pos =
@@ -35,14 +35,106 @@ class Parser
 		lines =
 			(splitWhere tokens, T.keyword '\n').filter (line) ->
 				not isEmpty line
+
 		lineExprs = []
 		allKeys = []
-		lines.forEach (line) =>
-			{ content, newKeys } = @line line
-			lineExprs.push content
-			allKeys.push newKeys...
+		isList = no
 
-		new E.Block tokens[0].pos(), lineExprs, allKeys
+		lines.forEach (line) =>
+			if (T.name '.x') line[0]
+				# It's a call on the previous line
+				if (isEmpty lineExprs) or not (last lineExprs).pure()
+					console.log (last lines).pure()
+					@unexpected line[0]
+				else
+					prev = lineExprs.pop()
+					method = new E.Member line[0].pos(), prev, line[0].text()
+					lineExprs.push new E.Call method, @expressionParts tail line
+
+			else
+				{ content, newKeys } = @line line
+				lineExprs.push content
+				isList ||= content instanceof E.ListElement
+				allKeys.push newKeys...
+
+		if isList
+			cCheck (isEmpty allKeys), @_pos,
+				'Block contains both list and dict elements.'
+
+			E.Block.List @_pos, lineExprs
+		else if isEmpty allKeys
+			E.Block.Plain @_pos, lineExprs
+		else
+			E.Block.Dict @_pos, lineExprs, allKeys
+
+	###
+	Parse an entire case statement.
+	@return [Case]
+	###
+	case: (tokens) ->
+		typeEach tokens, T.Token
+
+		casePos =
+			@_pos
+
+		[ casedTokens, block ] =
+			@takeIndentedFromEnd tokens
+
+		cCheck casedTokens.length == 1, @_pos,
+			'Expected only 1 name for case'
+
+		cased =
+			@local casedTokens[0]
+
+		parts =
+			(splitWhere block, T.keyword '\n').map (partTokens) =>
+				@casePart partTokens
+
+		elze =
+			if (last parts) instanceof E.Block
+				parts.pop()
+			else
+				null
+
+		parts.forEach (part) ->
+			cCheck part instanceof E.CasePart, part.pos(),
+				'Can only have `else` at end of case'
+
+		new E.Case casePos, cased, parts, elze
+
+	###
+	Parse a single test and resulting block within a case statement.
+	@return [CasePart]
+	###
+	casePart: (tokens) ->
+		typeEach tokens, T.Token
+
+		[ testTokens, blockTokens ] =
+			@takeIndentedFromEnd tokens
+
+		block =
+			@block blockTokens
+
+		t0 =
+			testTokens[0]
+
+		if (T.keyword 'else') t0
+			cCheck testTokens.length == 1, t0.pos(),
+				'Did not expect anything after #{t0}'
+			block
+		else
+			test =
+				if (T.keyword '=') t0
+					E.CaseTest.Equal t0.pos(), @expression (tail testTokens)
+				else if (T.name ':x') t0
+					cCheck testTokens.length == 1, t0.pos(),
+						'Did not expect anything after #{t0}.'
+					E.CaseTest.Type t0.pos(), t0.text()
+				else
+					E.CaseTest.Boolean @_pos, @expression testTokens
+
+			new E.CasePart test, block
+
 
 	###
 	Parses a pure expression.
@@ -51,19 +143,23 @@ class Parser
 	expression: (tokens) ->
 		typeEach tokens, T.Token
 
-		parts =
-			@expressionParts tokens
-
-		if isEmpty parts
-			E.null @_pos
+		if (T.keyword 'case') tokens[0]
+			@_pos = tokens[0].pos()
+			@case tail tokens
 		else
-			[ e0, rest ] =
-				unCons parts
+			parts =
+				@expressionParts tokens
 
-			if isEmpty rest
-				e0
+			if isEmpty parts
+				E.null @_pos
 			else
-				new E.Call e0, rest
+				[ e0, rest ] =
+					unCons parts
+
+				if isEmpty rest
+					e0
+				else
+					new E.Call e0, rest
 
 	###
 	Parses the components of an expression.
@@ -77,7 +173,7 @@ class Parser
 
 		tokens.forEach (token) =>
 			x =
-				if T.dotName token
+				if (T.name '.x') token
 					if (popped = parts.pop())?
 						new E.Member token.pos(), popped, token.text()
 					else
@@ -85,22 +181,32 @@ class Parser
 				else
 					@soloExpression token
 
-			parts.push x
+			parts.push x if x?
 
 		parts
 
-	fun: (tokens) ->
+	###
+	Parse a function header and body.
+	(The body is parsed by Parser.block().)
+	###
+	fun: (tokens, preserveThis) ->
 		[ argTokens, block ] =
-			rightUnCons tokens
+			@takeIndentedFromEnd tokens
+		parsedBlock =
+			@block block
+
+		returnType =
+			if ((T.name ':x') argTokens[0])
+				rt = argTokens[0]
+				argTokens = tail argTokens
+				rt.text()
+			else
+				null
 
 		args =
-			argTokens.map (token) =>
-				@name token
+			@typedVariables argTokens
 
-		cCheck ((T.group '→') block), @_pos, ->
-			"Function open up to indented block, not #{block}"
-
-		new E.Fun @_pos, args, @block block.body()
+		new E.Fun @_pos, returnType, args, parsedBlock, preserveThis
 
 	###
 	Parses a single line within a block.
@@ -110,35 +216,42 @@ class Parser
 	###
 	line: (tokens) ->
 		isAssign = (x) ->
-			((T.keyword '=') x) or (T.keyword '. ') x
+			((T.keyword '=') x) or (T.keyword '.') x
 
 		if tokens[0] instanceof T.Use
 			content: @use tokens
 			newKeys: [ ]
 
-		else if (x = trySplitOnceWhere tokens, isAssign)?
-			[ nameTokens, assigner, valueTokens ] = x
+		else if (T.keyword '.') tokens[0]
+			content: new E.ListElement tokens[0].pos(), @expression tail tokens
+			newKeys: [ ]
 
-			@_pos = assigner.pos()
-
-			names =
-				for t in nameTokens
-					@name t
+		else if (splitted = trySplitOnceWhere tokens, isAssign)?
+			[ nameTokens, assigner, valueTokens ] =
+				splitted
+			@_pos =
+				assigner.pos()
+			isObjectAssign =
+				assigner.kind() == '.'
+			vars =
+				# Don't allow members if it's an object assignment.
+				# So `a.b = 3` is allowed, but not `a.b. 3`.
+				@typedVariables nameTokens, not isObjectAssign
 			value =
 				@expression valueTokens
 
 			content:
-				switch names.length
+				switch vars.length
 					when 0
 						cFail @_pos, 'Assign to nothing'
 					when 1
-						new E.AssignSingle @_pos, names[0], null, value
+						new E.AssignSingle @_pos, vars[0], value
 					else
-						new E.AssignDestructure @_pos, names, value
-
+						new E.AssignDestructure @_pos, vars, value
 			newKeys:
-				if assigner.kind() == '. '
-					names
+				if isObjectAssign
+					vars.map (_var) ->
+						_var.var().name()
 				else
 					[]
 
@@ -147,13 +260,13 @@ class Parser
 			newKeys: []
 
 	###
-	Gets the text from what *ought* to be a `Name`.
-	@return [String]
+	Read in a local variable from a `Name`.
+	@return [Local]
 	###
-	name: (token) ->
-		cCheck token instanceof T.Name, token.pos(), ->
-			"Expected name, got #{token}"
-		token.text()
+	local: (token) ->
+		cCheck ((T.name 'x') token), token.pos(), ->
+			"Expected plain name, got #{token}"
+		new E.Local token.pos(), token.text()
 
 	###
 	Parses a single token which *should* be a pure expression of its own.
@@ -163,18 +276,21 @@ class Parser
 
 		switch token.constructor
 			when T.Name
-				if token.kind() == 'x'
-					new E.LocalAccess token.pos(), token.text()
-				else
-					fail()
+				switch token.kind()
+					when 'x'
+						new E.Local token.pos(), token.text()
+					when '@x'
+						new E.Member token.pos(), (new E.This token.pos()), token.text()
+					else
+						@unexpected token
 
 			when T.Group
 				@_pos = token.pos()
 				body = token.body()
 
 				switch token.kind()
-					when '|'
-						@fun body
+					when '|', '@|'
+						@fun body, token.kind() == '@|'
 					when '('
 						@expression body
 					when '→'
@@ -185,11 +301,68 @@ class Parser
 					else
 						fail()
 
+			when T.Keyword
+				switch token.kind()
+					when '@'
+						new E.This token.pos()
+					else
+						@unexpected token
+
 			else
 				if token instanceof T.Literal
 					new E.JS token.pos(), token.toJS()
 				else
 					@unexpected token
+
+	###
+	`tokens` *should* end in an indented block.
+	@return [ Array<Token>, Array<Token> ]
+	  All but the last token, and the body of the indented block.
+	###
+	takeIndentedFromEnd: (tokens) ->
+		typeEach tokens, T.Token
+
+		[ before, block ] =
+			rightUnCons tokens
+		cCheck ((T.group '→') block), @_pos, ->
+			"Expected to end in block, not #{block}"
+
+		[ before, block.body() ]
+
+
+	###
+	@return [Array<TypedVariable>]
+	###
+	typedVariables: (tokens) ->
+		out = []
+
+		idx = 0
+		while idx < tokens.length
+			local =
+				@local tokens[idx]
+			idx += 1
+
+			dots = []
+			while (T.name '.x') tokens[idx]
+				dots.push tokens[idx]
+				idx += 1
+
+			varType =
+				if (T.name ':x') tokens[idx]
+					idx +=1
+					tokens[idx - 1].text()
+				else
+					null
+
+			_var = local
+			until isEmpty dots
+				_var = new E.Member dots[0].pos(), _var, dots[0].text()
+				dots = tail dots
+
+			out.push new E.TypedVariable _var, varType
+
+		out
+
 
 	###
 	Throws a compiler error when a bad token is encountered.
@@ -209,10 +382,10 @@ class Parser
 			new E.Require use.pos(), use.path()
 
 		if tokens.length == 1
-			name =
-				use.localName()
+			_var =
+				new E.TypedVariable (new E.Local use.pos(), use.localName()), null
 
-			new E.AssignSingle use.pos(), name, null, used
+			new E.AssignSingle use.pos(), _var, used
 		else
 			[ _, _for, whatFor... ] = tokens
 			cCheck ((T.keyword 'for') _for), _for.pos(), ->
@@ -222,7 +395,9 @@ class Parser
 				whatFor.map (x) ->
 					cCheck (x instanceof T.Name and x.kind() == 'x'), x.pos(), ->
 						"Expected local name, got #{x}"
-					x.text()
+
+					loc = new E.Local x.pos(), x.text()
+					new E.TypedVariable loc, null
 
 			new E.AssignDestructure use.pos(), forThese, used
 

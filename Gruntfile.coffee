@@ -67,6 +67,9 @@ module.exports = (grunt) ->
 				dest: 'sample-js'
 				ext: '.js'
 
+				options:
+					prelude: 'sample-source/prelude.mason'
+
 		exec:
 			sample: 'node sample-js'
 

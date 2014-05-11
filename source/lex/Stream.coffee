@@ -1,3 +1,4 @@
+rgx = (require 'xregexp').XRegExp
 Pos = require '../compile-help/Pos'
 { cCheck } = require '../compile-help/check'
 { check, type } = require '../help/check'
@@ -11,8 +12,10 @@ module.exports = class Stream
 	@param str [String]
 	  Full text (this is not a real stream).
 	###
-	constructor: (@str) ->
-		@index = 0
+	constructor: (@_text) ->
+		type @_text, String
+
+		@_index = 0
 		@_pos = Pos.start()
 
 	###
@@ -20,13 +23,15 @@ module.exports = class Stream
 	###
 	maybeTake: (charClass) ->
 		type charClass, RegExp
-		@readChar() if charClass.test @peek()
+		charClass = rgx charClass
+
+		@readChar() if charClass.xtest @peek()
 
 	###
 	The next (or skip-th next) character without modifying the stream.
 	###
 	peek: (skip = 0) ->
-		@str[@index + skip]
+		@_text[@_index + skip]
 
 	###
 	Current position in the file.
@@ -49,7 +54,7 @@ module.exports = class Stream
 			@_pos = @_pos.plusLine()
 		else
 			@_pos = @_pos.plusColumn()
-		@index += 1
+		@_index += 1
 		x
 
 
@@ -68,7 +73,7 @@ module.exports = class Stream
 	###
 	stepBack: (n = 1) ->
 		times n, =>
-			@index -= 1
+			@_index -= 1
 			if @peek() == '\n'
 				@_pos = @_pos.minusLine()
 			else
@@ -82,19 +87,49 @@ module.exports = class Stream
 	###
 	takeWhile: (condition) ->
 		if condition instanceof RegExp
-			charClass = condition
+			charClass = rgx condition
 			condition = (char) ->
-				charClass.test char
+				charClass.xtest char
+		else
+			type condition, Function
 
-		start = @index
+		start =
+			@_index
+
 		while @peek() and condition @peek()
 			@readChar()
-		@str.slice start, @index
+
+		@_text.slice start, @_index
 
 	###
 	Reads until a character is in `charClass`.
 	###
 	takeUpTo: (charClass) ->
 		type charClass, RegExp
+		charClass = rgx charClass
+
 		@takeWhile (char) ->
-			not charClass.test char
+			not charClass.xtest char
+
+	###
+	@return [Boolean]
+	  Whether `N` of charClass were ever found.
+	###
+	takeUntilNOf: (charClass, N) ->
+		type charClass, RegExp, N, Number
+		charClass = rgx charClass
+
+		n = 0
+
+		while yes
+			x = @readChar()
+			unless x?
+				return no
+
+			if charClass.xtest x
+				n += 1
+				if n == N
+					return yes
+			else
+				n = 0
+

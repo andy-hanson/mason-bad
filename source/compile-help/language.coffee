@@ -27,13 +27,13 @@ Character classes used during tokenization.
 		rgx /[:@\.]/
 	name:
 		# If it's not used for anything else, it's a valid name!
-		rgx /[^\s\(\)\[\]\{\};,'"`\\\|@:.]/
+		rgx /[^\s\(\)\[\]\{\};,'"`\\\|@:.~#$]/
 
 ###
 Every kind a `Group` can have.
 ###
 @groupKinds =
-	[ '(', '→', '"', '|' ]
+	[ '(', '→', '"', '|', '@|' ]
 
 ###
 Maps group openers to closers.
@@ -42,19 +42,17 @@ Maps group openers to closers.
 	'(': ')'
 	'→': '←'
 
-###
-@groupKinds =
-	[ '(', '→', '"', '|' ]
-###
-
 @nameKinds =
 	[ 'x', '.x', '@x', ':x' ]
 
 @keywords = [
+	'case',
+	'else',
 	'use',
 	'for',
 	'=',
-	'. ',
+	'.',
 	'|',
-	'\n'
+	'\n',
+	'@'
 ]

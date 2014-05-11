@@ -1,7 +1,7 @@
 { cCheck, cFail, } = require '../compile-help/check'
 { groupMatch } = require '../compile-help/language'
 { check, type } = require '../help/check'
-{ isEmpty, last } = require '../help/list'
+{ isEmpty, last, rightTail } = require '../help/list'
 T = require '../Token'
 GroupPre = require './GroupPre'
 
@@ -19,13 +19,17 @@ module.exports = joinGroups = (tokens) ->
 		stack.push current
 		current = [ ]
 
-	finishLevel = (result) ->
+	finishLevel = ->
+		if (T.keyword '\n') last current
+			current = rightTail current
+
+		result =
+			new T.Group open.pos(), open.kind(), current
 		current = stack.pop()
 		current.push result
 
-	#specialOpenKinds = [ '|' ]
 	openKinds =
-		[ '(', '→', '|' ]
+		[ '(', '→', '|', '@|' ]
 	blockCloseKinds =
 		[ '←' ]
 	closeKinds =
@@ -44,14 +48,12 @@ module.exports = joinGroups = (tokens) ->
 				cCheck groupMatch[open.kind()] == kind, pos, ->
 					"#{open} does not match #{token}"
 
-				finishLevel new T.Group \
-					open.pos(), open.kind(), current
+				finishLevel()
 
 				if kind == '←'
-					if (last opens)?.kind() == '|'
+					if (last opens)?.kind() in [ '|', '@|' ]
 						open = opens.pop()
-						finishLevel new T.Group \
-							open.pos(), open.kind(), current
+						finishLevel()
 
 			else
 				fail()

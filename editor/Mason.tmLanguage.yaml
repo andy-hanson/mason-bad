@@ -11,36 +11,71 @@ uuid: 857c9cc3-2862-4a05-87e7-c7f90f51f1a7
 
 patterns:
 
-
 - name: keyword
-  match: \b(use|for|case|as)\b
+  match: \b(use|for|case|if|else)\b
+- name: keyword
+  comment: \@ on its own or before a property
+  match: \@
+
 
 - name: comment
+  comment: Block comment
+  begin: \\\\\\
+  end: \\\\\\
+
+
+- name: comment
+  comment: Single-line comment
   match: \\.*
 
+
 - name: constant.numeric
-  match: \d+(\.\d+)*
+  match: \d+(\.\d+)?
+
+- name: support.type
+  commment: Type appearing on its own in a case statement.
+  match: :\S+
+
 
 - name: variable
   comment: Local assignment
-  match: ^([^:]*)(:)?(.*)?\s(=)
+  match: (([^\s:~]+)(:([^\s~]+))?(~([^\s]+))?\s)+(=)
   captures:
-    '2':
-      name: comment
     '3':
-      name: support.type
+      # Colon
+      name: comment
     '4':
+      # Type
+      name: support.type
+    '5':
+      # Tilde
+      name: comment
+    '6':
+      # Rename
+      name: entity.other
+    '7':
+      # Equals
       name: comment
 
 - name: storage
   comment: Object assignment
-  match: ^([^:.]*)(:)?([^.]*)?(\.)
+  # Match and captures closely mirror those in local assignment
+  match: (([^\s:~]+)(:([^\s~]+))?(~([^\s]+))?(\s|\.))+\s
   captures:
-    '2':
-      name: comment
     '3':
-      name: support.type
+      # Colon
+      name: comment
     '4':
+      # Type
+      name: support.type
+    '5':
+      # Tilde
+      name: comment
+    '6':
+      # Rename
+      name: entity.other
+    '7':
+      # Equals
       name: comment
 
 

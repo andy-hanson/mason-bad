@@ -1,3 +1,4 @@
+{ toStringLiteral } = require './compile-help/JavaScript-syntax'
 { groupKinds, nameKinds, keywords } = require './compile-help/language'
 { abstract, check, type, typeEach } = require './help/check'
 { last } = require './help/list'
@@ -55,7 +56,7 @@ class StringLiteral extends Literal
 
 	# @noDoc
 	toJS: ->
-		"\"#{@_value}\""
+		toStringLiteral @_value
 
 ###
 A floating-point number.
@@ -116,7 +117,7 @@ class Group extends Token
 
 	# @noDoc
 	show: ->
-		"#{@_kind}<#{@_body}>"
+		"'#{@_kind}'<#{@_body.join ', '}>"
 
 
 ###
@@ -243,5 +244,5 @@ module.exports =
 	keyword: (kind) -> (token) ->
 		token instanceof Keyword and token.kind() == kind
 
-	dotName: (token) ->
-		token instanceof Name and token.kind() == '.x'
+	name: (kind) -> (token) ->
+		token instanceof Name and token.kind() == kind

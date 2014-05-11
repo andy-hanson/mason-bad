@@ -1,0 +1,35 @@
+use .class
+use .arithmetic
+log! = console.log
+
+Vec2 get-x get-y. class
+	name. "Vec2"
+	members.
+		x.
+		y.
+
+
+\\\
++. |a:Vec2(x::xa y::ya) b:Vec2(x::xb y::yb)
+	Vec2
+		x. arithmetic.+ xa xb
+		y. arithmetic.+ xb yb
+
+\\\
+
++. |a:Vec2 b:Vec2
+	Vec2
+		x. arithmetic.+ (get-x a) (get-x b)
+		y. arithmetic.+ (get-y a) (get-y b)
+
+\\\
+neg. |a:Vec2
+	Vec2
+		x. neg (x a)
+		y. neg (y a)
+
+-. |a:Vec2 b:Vec2
+	Vec2
+		x. - (x a) (x b)
+		y. - (y a) (y b)
+\\\

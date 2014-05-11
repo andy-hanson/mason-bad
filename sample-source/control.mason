@@ -1,3 +1,9 @@
+use .logic for not
 
-?. |cond then else
-	`cond ? then() : _else()`
+if. |condition then
+	`condition ? then() : null`
+
+unless. |condition then
+	if (not condition) then
+
+

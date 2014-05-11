@@ -1,5 +1,5 @@
 use arithmetic for +
-use graceful-fs as fs
+use graceful-fs~fs
 
 \ comment
 
@@ -13,20 +13,22 @@ pi:Number. 3.14
 
 
 ""
+
 "One plus one is {1 + 1}!"
+
 "
 	It's still {1 + 1}...
 
-it
 
-x:Type
-
-p = Pair 1 2
-
-case p
-	as Pair x y
-		log x y
-	as Number
-		log p
-
-
+count-string. |a
+	case a
+		0
+			"zero"
+		1
+			"one"
+		if < a 10
+			"some"
+		:Number
+			"a lot"
+		else
+			"not a number"

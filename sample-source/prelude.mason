@@ -1,0 +1,7 @@
+\\\
+use .logic for True False and or not nand nor xor
+use .arithmetic for + - * / <
+use .control for ? if unless check fail
+log! = console.log
+\\\
+

@@ -40,9 +40,12 @@ module.exports = tokenize = (stream, inQuoteInterpolation = no) ->
 	takeName = ->
 		cCheck not (char.digit.xtest stream.peek()), stream.pos(),
 			'Expected name, got number'
-		name = stream.takeWhile char.name
+		name =
+			stream.takeWhile char.name
+
 		cCheck not (isEmpty name), stream.pos(),
 			'Expected name, got nothing'
+
 		name
 
 
@@ -71,9 +74,9 @@ module.exports = tokenize = (stream, inQuoteInterpolation = no) ->
 				when maybeTake char.groupPre
 					new GroupPre stream.pos(), ch
 
-				when ch == '.' and (stream.peek 1) == ' '
-					stream.skip 2
-					new T.Keyword pos, '. '
+				when ch == '.' and /\s/.test stream.peek 1
+					stream.skip 1
+					new T.Keyword pos, '.'
 
 				when ch == '='
 					stream.skip()
@@ -81,8 +84,14 @@ module.exports = tokenize = (stream, inQuoteInterpolation = no) ->
 
 				when maybeTake char.precedesName
 					kind = "#{ch}x"
-					name = takeName()
-					new T.Name pos, name, kind
+					if ch == '@' and maybeTake /\|/
+						removePrecedingNewLine()
+						new GroupPre pos, '@|'
+					else if ch in [ '.', '@' ] and not char.name.xtest stream.peek()
+						new T.Keyword pos, ch
+					else
+						name = takeName()
+						new T.Name pos, name, kind
 
 
 				when match char.name
@@ -104,7 +113,13 @@ module.exports = tokenize = (stream, inQuoteInterpolation = no) ->
 					[ ]
 
 				when ch == '\\'
-					stream.takeUpTo /\n/
+					if (stream.peek 1) == '\\' and (stream.peek 2) == '\\'
+						stream.skip 3
+						stream.takeUntilNOf /\\/, 3
+						cCheck stream.peek() == '\n', stream.pos(), ->
+							"Block comment must be followed by newline, not '#{stream.peek()}'"
+					else
+						stream.takeUpTo /\n/
 					[ ]
 
 				when ch == '\n'

@@ -1,28 +1,33 @@
-+. |a b
++. |a:Number b:Number
 	`a + b`
--. |a b
+neg. |a:Number
+	`-a`
+-. |a:Number b:Number
 	`a - b`
-*. |a b
+*. |a:Number b:Number
 	`a * b`
-/. |a b
+/. |a:Number b:Number
 	`a / b`
-^. |a b
+^. |a:Number b:Number
 	Math.pow a b
-log-e. |a
+log-e. |a:Number
 	Math.log a
-log. |a b
+log. |a:Number b:Number
 	/ (log-e a) (log-e b)
-modulo. |a b
+modulo. |a:Number b:Number
 	`a % b`
-^-1. |a
+^-1. |a:Number
 	/ 1 a
-<. |a b
+
+\ TODO: these should be generic
+
+<. |a:Number b:Number
 	`a < b`
->. |a b
+>. |a:Number b:Number
 	`a > b`
-<=. |a b
+<=. |a:Number b:Number
 	`a <= b`
->=. |a b
+>=. |a:Number b:Number
 	`a >= b`
 
 

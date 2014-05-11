@@ -17,7 +17,19 @@ module.exports = class BlockWrap extends Expression
 
 	# @noDoc
 	compile: (context) ->
+		blockContext =
+			context.indented().withBoundThis()
 		block =
-			@_block.compile context
+			@_block.toNode blockContext
 
-		[ '(function()\n', context.indent(), block, ')()' ]
+		[ arg, closer ] =
+			if context.boundThis()
+				[ '', '' ]
+			else
+				[ '_this', 'this' ]
+
+
+		[	'(function(', arg, ')\n',
+			context.indent(), '{\n',
+			blockContext.indent(), block, '\n',
+			context.indent(), '})(', closer, ')' ]

@@ -21,6 +21,7 @@ module.exports = class Options
 		@_checks = options.checks ? yes
 		@_fileName = options.fileName
 		@_outFileName = options.outFileName
+		@_prelude = options.prelude
 
 
 	#withFileName: (fileName) ->
@@ -42,6 +43,11 @@ module.exports = class Options
 	Full path to the destination file.
 	###
 	outFileName: -> @_outFileName
+
+	###
+	Text to be appended before every file.
+	###
+	prelude: -> @_prelude
 
 	###
 	Basename of the destination file.

@@ -69,7 +69,7 @@ javaScriptKeywords =
 	""".split '\n'
 
 illegalJavaScriptNameChar =
-	rgx /[^a-zA-Z]/g
+	rgx /[^a-zA-Z0-9]/g
 
 ###
 False if `name` will pass as a regular JavaScript variable name.
@@ -79,10 +79,8 @@ False if `name` will pass as a regular JavaScript variable name.
 @needsMangle = (name) ->
 	type name, String
 
-	ans = Array.prototype.some.call name, (ch) ->
+	(name in javaScriptKeywords) or Array.prototype.some.call name, (ch) ->
 		illegalJavaScriptNameChar.xtest ch
-
-	ans
 
 ###
 Generates a valid JavaScript local name from a Mason one.
@@ -106,13 +104,13 @@ A literal which, if quoted in JavaScript, would represent `str`.
 	type str, String
 
 	escaped =
-		str.replace /'|"|\t|\n/g, (char) ->
+		str.replace /["\t\n]/g, (char) ->
 			switch char
 				when '\n'
 					'\\n'
 				when '\t'
 					'\\t'
-				when "'"
-					"\\'"
+				when '"'
+					'\\"'
 
-	"'#{escaped}'"
+	"\"#{escaped}\""

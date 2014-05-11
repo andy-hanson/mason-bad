@@ -6,6 +6,7 @@ AssignSingle = require './AssignSingle'
 Expression = require './Expression'
 JS = require './JS'
 Member = require './Member'
+TypedVariable = require './TypedVariable'
 
 ###
 Represents object destructuring assignment.
@@ -19,12 +20,12 @@ In:
 module.exports = class AssignDestructure extends Expression
 	###
 	@param _pos [Pos]
-	@param _names [Array<String>]
+	@param _vars [Array<TypedVariable>]
 	@param _value [Expression]
 	###
-	constructor: (@_pos, @_names, @_value) ->
+	constructor: (@_pos, @_vars, @_value) ->
 		type @_pos, Pos
-		typeEach @_names, String
+		typeEach @_vars, TypedVariable
 		type @_value, Expression
 
 	# @noDoc
@@ -36,21 +37,22 @@ module.exports = class AssignDestructure extends Expression
 		val =
 			@_value.toNode context.indented()
 
-		ref =
+		refDef =
 			[ 'var _ref =\n', context.indent(), '\t', val ]
 
-		assigns =
-			@_names.map (name) =>
-				la =
-					new JS @pos(), '_ref'
-				ma =
-					new Member @pos(), la, name
-				as =
-					new AssignSingle @pos(), name, null, ma
+		refAccess =
+			new JS @pos(), '_ref'
 
-				as.toNode context
+		assigns =
+			@_vars.map (_var) =>
+				refMember =
+					new Member @pos(), refAccess, _var.var().name()
+				assign =
+					new AssignSingle @pos(), _var, refMember
+
+				assign.toNode context
 
 		nl =
 			[ ';\n', context.indent() ]
 
-		[ ref, nl, (interleave assigns, nl) ]
+		[ refDef, nl, (interleave assigns, nl) ]

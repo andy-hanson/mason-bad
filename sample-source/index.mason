@@ -1,12 +1,41 @@
+use .logic for True False and or not nand nor xor
 use .arithmetic for + - * / <
-use .control for ?
-log = console.log
+use .control for ? if unless check fail
+use .Vec2
+log! = console.log
+
+v = Vec2.Vec2
+	x. 1
+	y. 2
+
+log! v
+log! (Vec2.+ v v)
 
 factorial = |a
-	? (< a 2) |
-		1
-	|
-		* a (factorial (- a 1))
+	case a
+		= -1
+			-1
+		< a 2
+			1
+		else
+			* a (factorial (- a 1))
 
-log "4! is {factorial 4}"
+count-string. |a
+	case a
+		= 0
+			"none"
+		:Number
+			"lots"
+		else
+			"Not a Number, it's {a}!"
+
+log! (factorial 10)
+
+log! (count-string 0)
+log! (count-string 5)
+log! (count-string 15)
+log! (count-string (Vec2.Vec2
+	x. 1
+	y. 2
+))
 

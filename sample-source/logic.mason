@@ -1,0 +1,26 @@
+True.
+	`true`
+
+False.
+	`false`
+
+not. |a
+	`!a`
+
+and. |a b
+	`a && b()`
+
+or. |a b
+	`a || b()`
+
+nand. |a b
+	not (and a b)
+
+nor. |a b
+	not (or a b)
+
+xor. |a b
+	`a !== b`
+
+implies. |a b
+	or (not a) b

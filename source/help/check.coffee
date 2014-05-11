@@ -15,11 +15,16 @@ Any errors have their message prepended by the result of `annotate`.
 		throw error
 
 
-# @noDoc
+###
+@noDoc
+@param args [Arguments]
+@param mustExist [Boolean]
+###
 typeIt = (args, mustExist) ->
 	i = 0
 	while i < args.length
-		[ value, type ] = args[i .. i+1]
+		value = args[i]
+		type = args[i + 1]
 		i += 2
 
 		unless value?

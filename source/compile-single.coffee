@@ -7,12 +7,17 @@ parse = require './parse'
 module.exports = (source, options) ->
 	type source, String, options, Options
 
+	if options.prelude()?
+		source = "#{options.prelude()}\n#{source}"
+
 	annotateErrors ->
-		lexed = lex source
-		expr = parse lexed
+		tokens =
+			lex source
+		expression =
+			parse tokens
 
-		node = expr.toNode new E.Context options, ''
-
+		node =
+			expression.toNode new E.Context.start options
 		node.prepend """
 		// Compiled from #{options.fileName()}
 		//# sourceMappingURL=#{options.shortOutFileName()}.map

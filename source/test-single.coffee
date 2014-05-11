@@ -2,19 +2,27 @@ lex = require './lex'
 { compile } = require './index'
 Options = require './Options'
 
-str1 = '''
-a = 0
-b. 0
-one .two @three :four 5 -6.789
+str = '''
+
+factorial = |a
+	case a
+		= -1
+			-1
+		< a 2
+			1
+		else
+			* a factorial (- a 1)
+
+
 '''
 
-str2 = '''
-?. |cond then else
-	`cond ? then() : else()`
-'''
+type = 'output'
 
-out =
-	compile str2
+switch type
+	when 'tokens'
+		for token in lex str
+			console.log token.toString()
 
-console.log out.code
-
+	when 'output'
+		out = compile str
+		console.log out.code

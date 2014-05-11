@@ -1,14 +1,14 @@
 { mangle } = require '../compile-help/JavaScript-syntax'
 Pos = require '../compile-help/Pos'
 { type } = require '../help/check'
-Expression = require './Expression'
+Assignable = require './Assignable'
 
 ###
 Accesses a local variable.
 Does not check if it was ever defined.
 Permits global access as well.
 ###
-module.exports = class LocalAccess extends Expression
+module.exports = class Local extends Assignable
 	###
 	@_param _pos [Pos]
 	@_param _name [String]
@@ -17,5 +17,12 @@ module.exports = class LocalAccess extends Expression
 		type @_pos, Pos, @_name, String
 
 	# @noDoc
+	name: -> @_name
+
+	# @noDoc
 	compile: ->
-		mangle @_name
+		mangle @name()
+
+	# @noDoc
+	assignableCode: ->
+		[ 'var ', mangle @name() ]

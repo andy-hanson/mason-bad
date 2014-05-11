@@ -1,0 +1,14 @@
+\\\
+fail. |explain
+	`throw new Error(explain)`
+	()
+
+throw! |error
+	case error
+		as Error
+			`throw error`
+		as String
+			`throw new Error(error)`
+\\\
+
+
