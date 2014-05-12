@@ -1,23 +1,27 @@
 use arithmetic for +
 use graceful-fs~fs
 
+
+""
+"\"" was a string
+"One plus one is {1 + 1}!"
+"
+	It's still {1 + 1}...
+	\{not an interpolation}
+
+
 \ comment
+\\\
+comment
+\\\
 
 123.45
 
-pi:Number = 3.14
-pi:Number. 3.14
+pi:Number~pie pi:Number~pie = 3.14
+pi:Number~pie pi:Number~pie pi:Number~pie. 3.14
 
-|:Number x:Number \ a function
+|:Number x:Number
 	+ x 3
-
-
-""
-
-"One plus one is {1 + 1}!"
-
-"
-	It's still {1 + 1}...
 
 
 count-string. |a

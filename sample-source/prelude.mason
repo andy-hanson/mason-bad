@@ -1,7 +1,38 @@
 \\\
-use .logic for True False and or not nand nor xor
-use .arithmetic for + - * / <
-use .control for ? if unless check fail
-log! = console.log
+Recommended default prelude for mason projects.
 \\\
 
+use .alias for Act Bool Dict Fun Int Nat Real Str
+
+use .arithmetic for + - neg * / remainder ^ log-e log
+use .arithmetic for square square-root
+use .arithmetic for abs increment decrement
+use .arithmetic for round-towards-zero round round-down round-up whole?
+use .arithmetic for divisible? zero? positive-zero? negative-zero? sign
+use .arithmetic for positive? negative? finite? not-a-number?
+use .arithmetic for sin cos tan arc-cos arc-sin arc-tan
+
+use .Bool for True False not and or nand nor xor
+
+use .class
+
+\ use .check for ???
+\ use .collection for ???
+
+use .control for if unless while until do-while do-until times returning
+
+\ use .dict for ???
+
+use .error for annotate-errors catch-opt catch fail! throw! throws? try try-catch try-catch-finally
+
+use .extend!
+
+use .js-util for identical? new send exists? is-a? truthy?
+
+use .method for method implement
+
+use .Option for Some None force
+
+use .random
+
+use .singleton

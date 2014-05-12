@@ -19,7 +19,7 @@ module.exports = class Expression
 		type context, Context
 
 		new SourceNode \
-			@pos().line(), \
+			@pos().sourceNodeSafeLine(), \
 			@pos().column(), \
 			context.options().fileName(), \
 			chunk

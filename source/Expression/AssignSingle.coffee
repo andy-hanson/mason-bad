@@ -14,9 +14,9 @@ module.exports = class AssignSingle extends Expression
 	@param _type [Null]
 	@param _value [Expression]
 	###
-	constructor: (@_pos, @_var, @_value) ->
+	constructor: (@_pos, @_var, @_value, @_isMutate) ->
 		type @_pos, Pos, @_var, TypedVariable
-		type @_value, Expression
+		type @_value, Expression, @_isMutate, Boolean
 
 	# @noDoc
 	pure: ->
@@ -25,7 +25,7 @@ module.exports = class AssignSingle extends Expression
 	# @noDoc
 	compile: (context) ->
 		assignTo =
-			@_var.var().assignableCode context
+			@_var.var().assignableCode context, @_isMutate
 		val =
 			@_value.toNode context.indented()
 		ass =

@@ -7,7 +7,8 @@ module.exports = (grunt) ->
 			prelude: null
 
 		prelude =
-			grunt.file.read options.prelude
+			if options.prelude?
+				grunt.file.read options.prelude
 
 		# Iterate over all specified file groups.
 		@files.forEach (fileGroup) ->

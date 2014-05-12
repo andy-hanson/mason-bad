@@ -11,8 +11,41 @@ uuid: 857c9cc3-2862-4a05-87e7-c7f90f51f1a7
 
 patterns:
 
+
+# Empty string
+- name: string
+  match: \"\"
+# Multi-line string
+- name: string
+  begin: \"\n
+  end: ^$ # on blank line
+  patterns:
+  - name: constant.character
+    comment: Escaped character
+    match: \\.
+  - name: variable
+    comment: Interpolation
+    match: \{[^\}]*\}
+# Single-line string
+- name: string
+  begin: \"
+  end: \"
+  patterns:
+  - name: constant.character
+    comment: Escaped character
+    match: \\.
+  - name: variable
+    comment: Interpolation
+    match: \{[^\}]*\}
+
+
+
+- name: support.other
+  comment: JavaScript literal
+  match: "`[^`]*`"
+
 - name: keyword
-  match: \b(use|for|case|if|else)\b
+  match: \b(use|for|case|else|res|_)\b
 - name: keyword
   comment: \@ on its own or before a property
   match: \@
@@ -57,26 +90,31 @@ patterns:
       # Equals
       name: comment
 
+
 - name: storage
   comment: Object assignment
-  # Match and captures closely mirror those in local assignment
-  match: (([^\s:~]+)(:([^\s~]+))?(~([^\s]+))?(\s|\.))+\s
+  # Match and captures closely mirror those in local assignment.
+  match: ([^\.]*)(\.\s)
+  #(\s?[^\s:~.]+(:([^\s~.]+))?(~([^\s.]+))?)+(\.)\s
   captures:
-    '3':
-      # Colon
+    '2':
+      # Dot
       name: comment
-    '4':
-      # Type
-      name: support.type
-    '5':
-      # Tilde
-      name: comment
-    '6':
-      # Rename
-      name: entity.other
-    '7':
-      # Equals
-      name: comment
+    #'2':
+    #  # Colon
+    #  name: comment
+    #'3':
+    #  # Type
+    #  name: support.type
+    #'4':
+    #  # Tilde
+    #  name: comment
+    #'5':
+    #  # Rename
+    #  name: entity.other
+    #'6':
+    #  # Dot
+    #  name: comment
 
 
 - name: variable.parameter
@@ -95,27 +133,6 @@ patterns:
       match: \\.*
 
 
-
-# Empty string
-- name: string
-  match: \"\"
-# Multi-line string
-- name: string
-  begin: \"\n
-  end: ^$ # on blank line
-  patterns:
-  - name: variable
-    match: \{[^\}]*\}
-# Single-line string
-- name: string
-  begin: \"
-  end: \"
-  patterns:
-  - name: variable
-    match: \{[^\}]*\}
-
-- name: support.other
-  match: "`.*`"
 
 - name: keyword
   match: "[\\(\\[\\{\\}\\]\\)]"

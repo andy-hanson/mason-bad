@@ -1,9 +1,38 @@
-use .logic for not
+use .Bool for not
+use .alias for Fun Act
+use .Option for Option Some None
 
-if. |condition then
-	`condition ? then() : null`
+if. |condition:Bool then:Function
+	case condition
+		_
+			Some
+				value. (make-value ())
+		else
+			None
 
-unless. |condition then
+unless. |condition:Bool then:Act
 	if (not condition) then
 
+while. |condition:Fun do:Act
+	`while (condition()) { _do() }`
+	()
 
+until. |condition:Fun do:Act
+	`while (!condition()) { _do() }`
+	()
+
+do-while. |do:Act condition:Fun
+	`do { _do() } while (condition())`
+	()
+
+do-until. |do:Fun condition:Act
+	`do { _do() } while (!condition())`
+	()
+
+times. |n:Int do:Act
+	`for (var i = 0; i < n; ++i) { _do(i) }`
+	()
+
+returning. |value do-after:Fun
+	do-after value
+	value

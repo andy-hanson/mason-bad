@@ -23,10 +23,10 @@ module.exports = class AssignDestructure extends Expression
 	@param _vars [Array<TypedVariable>]
 	@param _value [Expression]
 	###
-	constructor: (@_pos, @_vars, @_value) ->
+	constructor: (@_pos, @_vars, @_value, @_isMutate) ->
 		type @_pos, Pos
 		typeEach @_vars, TypedVariable
-		type @_value, Expression
+		type @_value, Expression, @_isMutate, Boolean
 
 	# @noDoc
 	pure: ->
@@ -48,7 +48,7 @@ module.exports = class AssignDestructure extends Expression
 				refMember =
 					new Member @pos(), refAccess, _var.var().name()
 				assign =
-					new AssignSingle @pos(), _var, refMember
+					new AssignSingle @pos(), _var, refMember, @_isMutate
 
 				assign.toNode context
 

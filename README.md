@@ -186,12 +186,12 @@ Types
 
 You can give types to local variables, including dict entries.
 
-	one:Number. 1
-	two:Number. "2" \ Fails!
+	one:Int. 1
+	two:Int. "2" \ Fails!
 
 Function arguments can be given types as well.
 
-	decrement = |a:Number
+	decrement = |a:Int
 		- a 1
 
 	decrement 1 \ Succeeds!
@@ -199,29 +199,42 @@ Function arguments can be given types as well.
 
 You can specify return types by putting the type right after the `|`.
 
-	decrement = |:Number a:Number
+	decrement = |:Int a:Int
 		"I am real legitimate Number"
 
 	decrement 1 \ Fails!
+
+The compiler handles these types specially using `typeof`:
+
+* Bool: Matches booleans.
+* Nat, Int, Real: Match numbers. Currently, Nat and Int will match any Real.
+* Str: Mathes strings.
+
+All other types are handled using `instanceof`.
+
+You can also describe your types in more detail using `[]`. Everything in the brackets is ignored.
+
+	passes-all-tests. |x:Int tests:Array[Fun[Int -> Bool]]
+		...
 
 
 
 Case
 ---
 
-Mason contains one built-in control flow.
+With `case` you can neatly deal with all the potential values of a variable.
 
 	count-string. |a
 		case a
 			= 0
 				"none"
-			< a 2
+			< _ 2
 				"some"
 			else
 				"lots"
 
 To test equality, use `=`.
-To do any other test, just write your expression on the line.
+To do any other test, just write your expression on the line. `_` stands for the value you `case` on.
 Use `else` for a fallback. If you don't provide it and none of the tests match, an error will be thrown.
 You can also `case` on types.
 
@@ -230,25 +243,23 @@ You can also `case` on types.
 			:String
 				"It's a string"
 			:Number
-				"It's a number"
+				"It's not 42"
 			else
 				"Who cares?"
 
-If you want to handle multiple cases the same way, use `,`.
+If you want to handle many cases the same way, use `,`.
 
 	length. |a
-		:String, :Array
-			a.length
-		:Number
-			abs a
+		case a
+			:String, :Array, has-property? _ "length"
+				a.length
+			:Number
+				abs a
 
 
 
-Use Modules
+Use
 ---
-
-CommonJS's `require` can be used,
-	but there's an easier syntax for it, based on Python's.
 
 Here's a sample directory structure:
 

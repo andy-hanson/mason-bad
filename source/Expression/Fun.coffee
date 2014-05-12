@@ -27,14 +27,14 @@ module.exports = class Fun extends Expression
 	# @noDoc
 	compile: (context) ->
 		if @_preserveThis
-			if context.boundThis()
+			if context.localThis()
 				@compilePlain context
 			else
 				block =
 					Block.Plain @pos(), [ @ ]
 				(new BlockWrap @pos(), block).compile context
 		else
-			@compilePlain context.withoutBoundThis()
+			@compilePlain context.withoutLocalThis()
 
 	# @private
 	compilePlain: (context) ->

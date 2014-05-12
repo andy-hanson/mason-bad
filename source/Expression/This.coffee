@@ -14,7 +14,7 @@ module.exports = class This extends Expression
 
 	# @noDoc
 	compile: (context) ->
-		if context.boundThis()
+		if context.localThis()
 			'_this'
 		else
 			'this'

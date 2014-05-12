@@ -1,11 +1,11 @@
 Pos = require '../compile-help/Pos'
 { type } = require '../help/check'
-Expression = require './Expression'
+Assignable = require './Assignable'
 
 ###
 JavaScript literal.
 ###
-module.exports = class JS extends Expression
+module.exports = class JS extends Assignable
 	###
 	@param _pos [Pos]
 	@param _text [String]
@@ -16,4 +16,8 @@ module.exports = class JS extends Expression
 
 	# @noDoc
 	compile: ->
+		@_text
+
+	# @noDoc
+	assignableCode: ->
 		@_text

@@ -12,6 +12,12 @@ module.exports = class Pos
 		Object.freeze @
 
 	###
+	Avoids line numbers < 1 or source map will fail.
+	###
+	sourceNodeSafeLine: ->
+		Math.max @line(), 1
+
+	###
 	Which line of the source file.
 	@return [Number]
 	###
@@ -46,3 +52,10 @@ module.exports = class Pos
 	# `Pos` representing the start of a file.
 	@start: ->
 		new Pos 1, 1
+
+	@startWithPrelude: (prelude) ->
+		type prelude, String
+
+		preludeLines = (prelude.split '\n').length
+		new Pos 1 - preludeLines, 1
+

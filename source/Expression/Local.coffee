@@ -24,5 +24,8 @@ module.exports = class Local extends Assignable
 		mangle @name()
 
 	# @noDoc
-	assignableCode: ->
-		[ 'var ', mangle @name() ]
+	assignableCode: (context, isMutate) ->
+		if isMutate
+			mangle @name()
+		else
+			[ 'var ', mangle @name() ]

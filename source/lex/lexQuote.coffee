@@ -1,7 +1,7 @@
 { cFail, cCheck } = require '../compile-help/check'
 { check, type } = require '../help/check'
 { isEmpty } = require '../help/list'
-{ repeated, withoutStart } = require '../help/string'
+{ repeated } = require '../help/string'
 { quoteEscape } = require '../compile-help/language'
 T = require '../Token'
 Stream = require './Stream'
@@ -31,11 +31,16 @@ module.exports = lexQuote = (stream, oldIndent) ->
 	finish = ->
 		text =
 			if indented
-				(withoutStart read, '\n').trimRight() # skip initial newline
+				read.trimRight()
 			else
 				read
 
-		out.push new T.StringLiteral stream.pos(), text
+		unless text == ''
+			out.push new T.StringLiteral stream.pos(), text
+
+		if indented and out[0] instanceof T.StringLiteral
+			out[0] = new T.StringLiteral out[0].pos(), out[0].value().trimLeft()
+
 		new T.Group startPos, '"', out
 
 	loop
@@ -51,10 +56,11 @@ module.exports = lexQuote = (stream, oldIndent) ->
 			if quoteEscape.has next
 				read += quoteEscape.get next
 			else
-				cFail startPos, "No need to escape '#{next}'"
+				cFail stream.pos(), "No need to escape '#{next}'"
 
 		else if ch == '{'
-			out.push new T.StringLiteral stream.pos(), read
+			unless read == ''
+				out.push new T.StringLiteral stream.pos(), read
 			read = ''
 			startPos =
 				stream.pos()
@@ -70,6 +76,7 @@ module.exports = lexQuote = (stream, oldIndent) ->
 				(stream.takeWhile /\t/).length
 
 			if nowIndent == 0 and stream.peek() == '\n'
+				# Permit blank, un-indented lines within indented quotes.
 				read += '\n'
 			else if nowIndent < quoteIndent
 				# Undo reading those tabs and that new line.
@@ -84,3 +91,4 @@ module.exports = lexQuote = (stream, oldIndent) ->
 
 		else
 			read += ch
+

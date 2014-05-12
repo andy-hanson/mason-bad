@@ -1,9 +1,55 @@
-use .logic for True False and or not nand nor xor
-use .arithmetic for + - * / <
-use .control for ? if unless check fail
-use .Vec2
+use .Option for Some None force
 log! = console.log
 
+log! (Option 3)
+log! (Option undefined)
+
+\\\
+use source-map-support
+\source-map-support.install ()
+use .Bool for True False and or not nand nor xor
+use .arithmetic for + - * / < > abs
+use .control for ? if unless while times
+use .Vec2
+log! = console.log
+use .method for method implement
+
+
+
+size = method
+	name. "sizee"
+
+implement size Number |n
+	abs n
+
+implement size Array |arr
+	arr.length
+
+
+log! (size 3)
+log! (size
+	. 1
+	. 2
+)
+
+\\\
+
+
+\\\
+x = 4
+
+while |
+	> x 0
+|
+	log! x
+	x := - x 1
+
+times 3 |
+	log! "three times"
+\\\
+
+
+\\\
 v = Vec2.Vec2
 	x. 1
 	y. 2
@@ -38,4 +84,4 @@ log! (count-string (Vec2.Vec2
 	x. 1
 	y. 2
 ))
-
+\\\

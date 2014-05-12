@@ -54,6 +54,8 @@ class StringLiteral extends Literal
 	constructor: (@_pos, @_value) ->
 		type @_pos, Pos, @_value, String
 
+	value: -> @_value
+
 	# @noDoc
 	toJS: ->
 		toStringLiteral @_value

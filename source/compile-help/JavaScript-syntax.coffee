@@ -44,7 +44,6 @@ javaScriptKeywords =
 	long
 	native
 	new
-	null
 	package
 	private
 	protected
@@ -90,7 +89,9 @@ These names use `_` as an escape character.
 @mangle = (name) ->
 	type name, String
 
-	if name in javaScriptKeywords
+	if name == '_'
+		name
+	else if name in javaScriptKeywords
 		"_#{name}"
 	else
 		name.replace illegalJavaScriptNameChar, (ch) ->

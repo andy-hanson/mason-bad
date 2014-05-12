@@ -51,8 +51,10 @@ Maps group openers to closers.
 	'use',
 	'for',
 	'=',
+	':='
 	'.',
 	'|',
 	'\n',
-	'@'
+	'@',
+	','
 ]

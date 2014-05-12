@@ -1,9 +1,16 @@
 { mangle } = require '../compile-help/JavaScript-syntax'
 { type } = require '../help/check'
 
-# Types that are best checked using the `typeof` operator.
+###
+Types that are specially handled using `typeof`.
+Maps type names to the expected result of calling `typeof`.
+###
 typeOfTypes =
-	[ 'Boolean', 'Number', 'String' ]
+	Bool: 'boolean'
+	Nat: 'number'
+	Int: 'number'
+	Real: 'number'
+	Str: 'string'
 
 ###
 Generates a type test for a given variable name and type name.
@@ -11,7 +18,9 @@ Generates a type test for a given variable name and type name.
 module.exports = typeTest = (varName, typeName) ->
 	type varName, String, typeName, String
 
-	if typeName in typeOfTypes
-		[ 'typeof ', varName, ' === "', typeName.toLowerCase(), '"' ]
+	if typeOfTypes.hasOwnProperty typeName
+		typeOfResult =
+			typeOfTypes[typeName]
+		[ 'typeof ', (mangle varName), ' === "', typeOfResult, '"' ]
 	else
-		[  varName, ' instanceof ', (mangle typeName) ]
+		[  (mangle varName), ' instanceof ', (mangle typeName) ]

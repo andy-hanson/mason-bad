@@ -1,14 +1,56 @@
-\\\
-fail. |explain
-	`throw new Error(explain)`
+use .alias for Fun Act
+use .Option for Some None force
+use .Bool for True False
+
+annotate-errors. |try:Act make-annotation:Fun[Error]
+	try-catch try |error
+		annotation = make-annotation error
+		error.message := "{annotation}: {error.message}"
+		throw! error
+
+catch-opt. |try:Act
+	try-catch |
+		try ()
+		None
+	| error
+		Some error
+
+catch |try:Fun
+	force (catch-opt try) "Expected to throw an error."
+
+fail!. |explain
+	`throw new Error((explain == null) ? "Failed!" : explain)`
 	()
 
-throw! |error
+throw!. |error
 	case error
-		as Error
+		:Error
 			`throw error`
-		as String
+		else
 			`throw new Error(error)`
-\\\
+
+throws?. |try:Act
+	try-catch
+		try ()
+		False
+	|
+		True
+
+try. |try:Act
+	try-catch
+		Some (try ())
+	|
+		None
+
+try-catch. |try:Act catch:Fun[Error]
+	try-catch-finally try catch |
+		()
+
+try-catch-finally |try:Act catch:Fun[Error] finally:Act
+	`var res;`
+	`try { res = _try(); }`
+	`catch (error) { res = _catch(error); }`
+	`finally { _finally(); }`
+	res
 
 

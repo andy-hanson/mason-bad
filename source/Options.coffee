@@ -1,6 +1,6 @@
 nopt = require 'nopt'
 { basename } = require 'path'
-{ type } = require './help/check'
+{ type, typeExist } = require './help/check'
 
 ###
 Stores compilation options.
@@ -22,6 +22,9 @@ module.exports = class Options
 		@_fileName = options.fileName
 		@_outFileName = options.outFileName
 		@_prelude = options.prelude
+
+		type @_checks, Boolean, @_fileName, String, @_outFileName, String
+		typeExist @_prelude, String
 
 
 	#withFileName: (fileName) ->

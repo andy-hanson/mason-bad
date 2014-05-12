@@ -1,3 +1,4 @@
+{ mangle } = require '../compile-help/JavaScript-syntax'
 Pos = require '../compile-help/Pos'
 { check, type, typeExist } = require '../help/check'
 Assignable = require './Assignable'
@@ -46,7 +47,7 @@ module.exports = class TypedVariable extends Expression
 			err =
 				[	'throw new Error("\'',
 					name, '\' is no ', @_type,
-					', it\'s " + ', name, ')' ]
+					', it\'s " + ', (mangle name), ')' ]
 			checkCode =
 				[ 'if (!(', test, '))\n', context.indent(), '\t', err ]
 

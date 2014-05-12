@@ -44,7 +44,6 @@ class Parser
 			if (T.name '.x') line[0]
 				# It's a call on the previous line
 				if (isEmpty lineExprs) or not (last lineExprs).pure()
-					console.log (last lines).pure()
 					@unexpected line[0]
 				else
 					prev = lineExprs.pop()
@@ -79,17 +78,11 @@ class Parser
 
 		[ casedTokens, block ] =
 			@takeIndentedFromEnd tokens
-
-		cCheck casedTokens.length == 1, @_pos,
-			'Expected only 1 name for case'
-
 		cased =
-			@local casedTokens[0]
-
+			@expression casedTokens
 		parts =
 			(splitWhere block, T.keyword '\n').map (partTokens) =>
 				@casePart partTokens
-
 		elze =
 			if (last parts) instanceof E.Block
 				parts.pop()
@@ -120,21 +113,32 @@ class Parser
 
 		if (T.keyword 'else') t0
 			cCheck testTokens.length == 1, t0.pos(),
-				'Did not expect anything after #{t0}'
+				'Nothing may follow #{t0}'
 			block
 		else
-			test =
+			new E.CasePart (@caseTest testTokens), block
+
+	caseTest: (tokens) ->
+		typeEach tokens, T.Token
+
+		parts =
+			(splitWhere tokens, T.keyword ',').map (testTokens) =>
+				t0 =
+					testTokens[0]
+
 				if (T.keyword '=') t0
 					E.CaseTest.Equal t0.pos(), @expression (tail testTokens)
 				else if (T.name ':x') t0
 					cCheck testTokens.length == 1, t0.pos(),
-						'Did not expect anything after #{t0}.'
+						"Did not expect anything after #{t0}"
 					E.CaseTest.Type t0.pos(), t0.text()
 				else
 					E.CaseTest.Boolean @_pos, @expression testTokens
 
-			new E.CasePart test, block
-
+		if parts.length == 1
+			parts[0]
+		else
+			E.CaseTest.Or @_pos, parts
 
 	###
 	Parses a pure expression.
@@ -151,7 +155,7 @@ class Parser
 				@expressionParts tokens
 
 			if isEmpty parts
-				E.null @_pos
+				E.true @_pos
 			else
 				[ e0, rest ] =
 					unCons parts
@@ -215,8 +219,11 @@ class Parser
 	@return [{ content:Expression, newKeys:Array<String> }]
 	###
 	line: (tokens) ->
+		unless isEmpty tokens
+			@_pos = tokens[0].pos()
+
 		isAssign = (x) ->
-			((T.keyword '=') x) or (T.keyword '.') x
+			((T.keyword '=') x) or ((T.keyword '.') x) or (T.keyword ':=') x
 
 		if tokens[0] instanceof T.Use
 			content: @use tokens
@@ -233,6 +240,8 @@ class Parser
 				assigner.pos()
 			isObjectAssign =
 				assigner.kind() == '.'
+			isMutateAssign =
+				assigner.kind() == ':='
 			vars =
 				# Don't allow members if it's an object assignment.
 				# So `a.b = 3` is allowed, but not `a.b. 3`.
@@ -245,9 +254,9 @@ class Parser
 					when 0
 						cFail @_pos, 'Assign to nothing'
 					when 1
-						new E.AssignSingle @_pos, vars[0], value
+						new E.AssignSingle @_pos, vars[0], value, isMutateAssign
 					else
-						new E.AssignDestructure @_pos, vars, value
+						new E.AssignDestructure @_pos, vars, value, isMutateAssign
 			newKeys:
 				if isObjectAssign
 					vars.map (_var) ->
@@ -261,12 +270,15 @@ class Parser
 
 	###
 	Read in a local variable from a `Name`.
-	@return [Local]
+	@return [Local or JS]
 	###
 	local: (token) ->
-		cCheck ((T.name 'x') token), token.pos(), ->
-			"Expected plain name, got #{token}"
-		new E.Local token.pos(), token.text()
+		if token instanceof T.JSLiteral
+			new E.JS token.pos(), token.toJS()
+		else
+			cCheck ((T.name 'x') token), token.pos(), ->
+				"Expected plain name, got #{token}"
+			new E.Local token.pos(), token.text()
 
 	###
 	Parses a single token which *should* be a pure expression of its own.
@@ -380,12 +392,19 @@ class Parser
 
 		used =
 			new E.Require use.pos(), use.path()
+		isMutate =
+			# `use` can never be used to mutate a variable.
+			no
+
+		moduleLocal =
+			new E.Local use.pos(), use.localName()
+		_var =
+			new E.TypedVariable moduleLocal, null
+		moduleAssign =
+			new E.AssignSingle use.pos(), _var, used, isMutate
 
 		if tokens.length == 1
-			_var =
-				new E.TypedVariable (new E.Local use.pos(), use.localName()), null
-
-			new E.AssignSingle use.pos(), _var, used
+			moduleAssign
 		else
 			[ _, _for, whatFor... ] = tokens
 			cCheck ((T.keyword 'for') _for), _for.pos(), ->
@@ -399,7 +418,10 @@ class Parser
 					loc = new E.Local x.pos(), x.text()
 					new E.TypedVariable loc, null
 
-			new E.AssignDestructure use.pos(), forThese, used
+			destructure =
+				new E.AssignDestructure use.pos(), forThese, moduleLocal, isMutate
+
+			E.Block.Plain use.pos(), [ moduleAssign, destructure ]
 
 ###
 Finds the `Expression` that the `tokens` represent.

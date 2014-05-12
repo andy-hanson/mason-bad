@@ -74,6 +74,9 @@ module.exports = tokenize = (stream, inQuoteInterpolation = no) ->
 				when maybeTake char.groupPre
 					new GroupPre stream.pos(), ch
 
+				when maybeTake /,/
+					new T.Keyword pos, ','
+
 				when ch == '.' and /\s/.test stream.peek 1
 					stream.skip 1
 					new T.Keyword pos, '.'
@@ -85,14 +88,14 @@ module.exports = tokenize = (stream, inQuoteInterpolation = no) ->
 				when maybeTake char.precedesName
 					kind = "#{ch}x"
 					if ch == '@' and maybeTake /\|/
-						removePrecedingNewLine()
 						new GroupPre pos, '@|'
+					else if ch == ':' and maybeTake /\=/
+						new T.Keyword pos, ':='
 					else if ch in [ '.', '@' ] and not char.name.xtest stream.peek()
 						new T.Keyword pos, ch
 					else
 						name = takeName()
 						new T.Name pos, name, kind
-
 
 				when match char.name
 					name = takeName()
@@ -105,7 +108,6 @@ module.exports = tokenize = (stream, inQuoteInterpolation = no) ->
 						new T.Name pos, name, 'x'
 
 				when maybeTake /\|/
-					removePrecedingNewLine()
 					new GroupPre pos, ch
 
 				when ch == ' '
@@ -120,6 +122,27 @@ module.exports = tokenize = (stream, inQuoteInterpolation = no) ->
 							"Block comment must be followed by newline, not '#{stream.peek()}'"
 					else
 						stream.takeUpTo /\n/
+					[ ]
+
+				when ch == '['
+					pos = stream.pos()
+					stream.readChar()
+					n = 1
+					while yes
+						done =
+							switch stream.readChar()
+								when '['
+									n += 1
+									no
+								when ']'
+									n -= 1
+									n == 0
+								when '\n', undefined
+									cFail pos, 'Unclosed `[`'
+								else
+									no
+						if done
+							break
 					[ ]
 
 				when ch == '\n'

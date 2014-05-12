@@ -21,13 +21,17 @@ module.exports = class Case extends Expression
 	  Optional fallback. If missing the case will throw an error on fallback.
 	###
 	constructor: (@_pos, @_cased, @_parts, @_else) ->
-		type @_pos, Pos, @_cased, Local
+		type @_pos, Pos, @_cased, Expression
 		typeEach @_parts, CasePart
 		typeExist @_else, Block
 
 	# @noDoc
 	compile: (context) ->
-		(new BlockWrap @pos(), new CaseBlock @).toNode context
+		block =
+			new CaseBlock @
+		wrap =
+			new BlockWrap @pos(), block, '_', @_cased
+		wrap.toNode context
 
 ###
 @private
@@ -45,7 +49,7 @@ class CaseBlock extends Block
 	compile: (context) ->
 		parts =
 			@_case._parts.map (part) =>
-				part.toTest context, @_case._cased
+				part.toNode context
 		parts =
 			interleave parts, [ '\n', context.indent() ]
 		elze =

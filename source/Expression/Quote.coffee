@@ -1,6 +1,6 @@
 Pos = require '../compile-help/Pos'
 { type, typeEach } = require '../help/check'
-{ interleave } = require '../help/list'
+{ interleave, isEmpty } = require '../help/list'
 Expression = require './Expression'
 
 ###
@@ -19,7 +19,10 @@ module.exports = class Quote extends Expression
 
 	# @noDoc
 	compile: (context) ->
-		parts =
-			@_parts.map (part) ->
-				part.compile context
-		interleave parts, ' + '
+		if isEmpty @_parts
+			'""'
+		else
+			parts =
+				@_parts.map (part) ->
+					part.compile context
+			[ '"" + ', interleave parts, ' + ' ]

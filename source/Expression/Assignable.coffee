@@ -14,6 +14,10 @@ module.exports = class Assignable extends Expression
 
 	###
 	JavaScript code that will appear left of the `=` sign.
+	@param context [Context]
+	@param isMutate [Boolean]
+	  True if this assignment should change an existing variable.
+	  False if it should create a new one.
 	###
-	assignableCode: ->
+	assignableCode: (context, isMutate) ->
 		abstract()

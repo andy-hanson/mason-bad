@@ -15,4 +15,4 @@ module.exports = class ListElement extends Expression
 
 	# @noDoc
 	compile: (context) ->
-		[ '_res.push(', (@_value.toNode context), ')' ]
+		[ 'res.push(', (@_value.toNode context), ')' ]

@@ -12,11 +12,9 @@ module.exports = class Stream
 	@param str [String]
 	  Full text (this is not a real stream).
 	###
-	constructor: (@_text) ->
-		type @_text, String
-
+	constructor: (@_text, @_pos) ->
+		type @_text, String, @_pos, Pos
 		@_index = 0
-		@_pos = Pos.start()
 
 	###
 	If the next character is in `charClass`, read it.
@@ -103,6 +101,7 @@ module.exports = class Stream
 
 	###
 	Reads until a character is in `charClass`.
+	Does not read that character.
 	###
 	takeUpTo: (charClass) ->
 		type charClass, RegExp
@@ -110,6 +109,25 @@ module.exports = class Stream
 
 		@takeWhile (char) ->
 			not charClass.xtest char
+
+	###
+	Reads until a character is in `charClass`.
+	Skips over that character, but does not return it in the result.
+	###
+	###
+	takeUpToAndIncluding: (charClass) ->
+		type charClass, RegExp
+		charClass = rgx charClass
+
+		start = @_index
+
+		while ch = @peek()
+			@readChar()
+			if charClass.xtest ch
+				break
+
+		@_text.slice start, @_index - 1
+	###
 
 	###
 	@return [Boolean]

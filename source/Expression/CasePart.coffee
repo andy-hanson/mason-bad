@@ -25,9 +25,9 @@ module.exports = class CasePart extends Expression
 	`cased` is passed in by the `Case` I am a part of.
 	@return [Chunk]
 	###
-	toTest: (context, cased) ->
+	compile: (context) ->
 		test =
-			@_test.toTest context, cased
+			@_test.toNode context
 		blockContext =
 			context.indented()
 		block =

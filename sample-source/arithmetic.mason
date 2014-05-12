@@ -1,33 +1,144 @@
-+. |a:Number b:Number
+use .Bool for and
+use .js-util for identical?
+
++. |a:Real b:Real
 	`a + b`
-neg. |a:Number
-	`-a`
--. |a:Number b:Number
+
+-. |a:Real b:Real
 	`a - b`
-*. |a:Number b:Number
+
+neg. |a:Real
+	`-a`
+
+*. |a:Real b:Real
 	`a * b`
-/. |a:Number b:Number
+
+/. |a:Real b:Real
 	`a / b`
-^. |a:Number b:Number
-	Math.pow a b
-log-e. |a:Number
-	Math.log a
-log. |a:Number b:Number
-	/ (log-e a) (log-e b)
-modulo. |a:Number b:Number
+
+remainder. |a:Real b:Real
 	`a % b`
-^-1. |a:Number
-	/ 1 a
+
+^. |a:Real b:Real
+	Math.pow a b
+
+log-e. |a:Real
+	Math.log a
+
+log. |a:Real b:Real
+	/ (log-e a) (log-e b)
+
+square. |a:Real
+	* a a
+
+square-root. |a:Real
+	forbid-not-a-number (Math.sqrt a)
+
+nth-root. |a:Real n:Real
+	^ a (^-1 n)
+
+abs. |a:Real
+	Math.abs a
+
+increment. |a:Int
+	+ a 1
+
+decrement. |a:Int
+	- a 1
+
+round-towards-0. |a:Real
+	`a | 0`
+
+round. |a:Real
+	Math.round a
+
+round-down. |a:Real
+	Math.floor a
+
+round-up. |a:Real
+	Math.ceil a
+
+whole?. |a:Real
+	case a
+		not (finite? _)
+			False
+		< _ -9007199254740992
+			False
+		> _ 9007199254740992
+			False
+		= round-towards-zero _
+			True
+		else
+			False
+
+divisible?. |divided:Real divisor:Real
+	zero? (remainder divided divisor)
+
+
+zero?. |a:Real
+	identical? a 0
+
+positive-zero?. |a:Real
+	and (zero? a) |
+		positive? (^-1 a)
+
+negative-zero?. |a:Real
+	and (zero? a) |
+		not (positive? (^-1 a))
+
+sign. |a:Real
+	case a
+		positive? _
+			1
+		negative? _
+			-1
+		positive-zero? _
+			0
+		negative-zero? _
+			-0
+		else
+			Number.NaN
+
+positive?. |a:Real
+	> a 0
+
+negative?. |a:Real
+	< a 0
+
+finite?. |a:Real
+	Number.isFinite a
+
+not-a-number?. |a:Real
+	Number.isNaN a
+
+
+sin. |a:Real
+	Math.sin a
+cos. |a:Real
+	Math.cos a
+tan. |a:Real
+	Math.tan a
+arc-cos. |a:Real
+	\ out
+	\	forbid (not-a-number? res)
+	Math.acos a
+arc-sin. |a:Real
+	\ out
+	\	forbid (not-a-number? res)
+	forbid-not-a-number (Math.asin a)
+arc-tan. |a:Real
+	Math.atan a
+
 
 \ TODO: these should be generic
 
-<. |a:Number b:Number
+<. |a:Real b:Real
 	`a < b`
->. |a:Number b:Number
+>. |a:Real b:Real
 	`a > b`
-<=. |a:Number b:Number
+<=. |a:Real b:Real
 	`a <= b`
->=. |a:Number b:Number
+>=. |a:Real b:Real
 	`a >= b`
 
 

@@ -11,6 +11,7 @@
 		"chalk": "0.4.x",
 		"nopt": "2.2.x",
 		"source-map": "0.1.x",
+		"source-map-support": "0.2.x",
 		"wrench": "1.5.x",
 		"xregexp": "2.0.x"
 	},

@@ -7,12 +7,9 @@ parse = require './parse'
 module.exports = (source, options) ->
 	type source, String, options, Options
 
-	if options.prelude()?
-		source = "#{options.prelude()}\n#{source}"
-
 	annotateErrors ->
 		tokens =
-			lex source
+			lex source, options
 		expression =
 			parse tokens
 
@@ -21,6 +18,7 @@ module.exports = (source, options) ->
 		node.prepend """
 		// Compiled from #{options.fileName()}
 		//# sourceMappingURL=#{options.shortOutFileName()}.map
+		"use strict";
 		module.exports = #{}
 		"""
 		node.add '\n'

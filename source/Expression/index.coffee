@@ -21,5 +21,8 @@ module.exports =
 	This: require './This'
 	TypedVariable: require './TypedVariable'
 
-	null: (pos) ->
-		new JS pos, 'null'
+	#null: (pos) ->
+	#	new JS pos, 'null'
+
+	true: (pos) ->
+		new JS pos, 'true'

@@ -1,7 +1,8 @@
 { mangle, needsMangle } = require '../compile-help/JavaScript-syntax'
 Pos = require '../compile-help/Pos'
 { abstract, check, type, typeEach, typeExist } = require '../help/check'
-{ interleave, interleavePlus, isEmpty, last, rightUnCons } = require '../help/list'
+{ interleave, interleavePlus, isEmpty, last, rightUnCons } =
+	require '../help/list'
 Context = require './Context'
 Expression = require './Expression'
 Local = require './Local'
@@ -73,11 +74,11 @@ module.exports = class Block extends Expression
 		if returnValue?
 			if returnType?
 				unless alreadyMadeRes
-					lines.push [ 'var _res = ', returnValue ]
+					lines.push [ 'var res = ', returnValue ]
 				tv =
-					new TypedVariable (new Local @pos(), '_res'), returnType
+					new TypedVariable (new Local @pos(), 'res'), returnType
 				lines.push tv.typeCheck context
-				lines.push 'return _res'
+				lines.push 'return res'
 			else
 				lines.push [ 'return ', returnValue ]
 
@@ -91,7 +92,7 @@ module.exports = class Block extends Expression
 	  returnValue [Chunk?]
 	    Value to return. If undefined, the function returns nothing.
 	  alreadyMadeRes [Boolean]
-	    Whether the function already wrote to `_res`.
+	    Whether the function already wrote to `res`.
 	###
 	preReturn: (context) ->
 		abstract()
@@ -130,10 +131,10 @@ class ListBlock extends Block
 	# @noDoc
 	_preReturn: (context) ->
 		lines:
-			[ 'var _res = []' ].concat @_lines.map (line) ->
+			[ 'var res = []' ].concat @_lines.map (line) ->
 				line.toNode context
 		returnValue:
-			'_res'
+			'res'
 		alreadyMadeRes:
 			yes
 
@@ -156,7 +157,8 @@ class DictBlock extends Block
 			genObjectLiteral @_keys, context.indent()
 
 ###
-Block that returns the last line if it is a pure expression, else returns nothing.
+Block that returns the last line if it is a pure expression,
+else returns nothing.
 ###
 class PlainBlock extends Block
 	# @noDoc

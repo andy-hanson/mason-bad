@@ -1,5 +1,6 @@
 Pos = require '../compile-help/Pos'
-{ type } = require '../help/check'
+{ type, typeExist } = require '../help/check'
+{ interleave } = require '../help/list'
 Block = require './Block'
 Expression = require './Expression'
 
@@ -12,24 +13,32 @@ module.exports = class BlockWrap extends Expression
 	@param _pos [Pos]
 	@param _block [Block]
 	###
-	constructor: (@_pos, @_block) ->
+	constructor: (@_pos, @_block, @_othArgName, @_othArgVal) ->
 		type @_pos, Pos, @_block, Block
+		typeExist @_othArgName, String, @_othArgVal, Expression
 
 	# @noDoc
 	compile: (context) ->
 		blockContext =
-			context.indented().withBoundThis()
+			context.indented().withLocalThis()
 		block =
 			@_block.toNode blockContext
 
-		[ arg, closer ] =
-			if context.boundThis()
-				[ '', '' ]
-			else
-				[ '_this', 'this' ]
+		argNames = []
+		argVals = []
 
+		unless context.localThis()
+			argNames.push '_this'
+			argVals.push 'this'
+		if @_othArgName?
+			argNames.push @_othArgName
+			argVals.push @_othArgVal.toNode context
+		argNames =
+			interleave argNames, ', '
+		argVals =
+			interleave argVals, ', '
 
-		[	'(function(', arg, ')\n',
+		[	'(function(', argNames, ')\n',
 			context.indent(), '{\n',
 			blockContext.indent(), block, '\n',
-			context.indent(), '})(', closer, ')' ]
+			context.indent(), '})(', argVals, ')' ]
