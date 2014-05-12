@@ -81,10 +81,6 @@ module.exports = tokenize = (stream, inQuoteInterpolation = no) ->
 					stream.skip 1
 					new T.Keyword pos, '.'
 
-				when ch == '='
-					stream.skip()
-					new T.Keyword pos, '='
-
 				when maybeTake char.precedesName
 					kind = "#{ch}x"
 					if ch == '@' and maybeTake /\|/
@@ -102,6 +98,8 @@ module.exports = tokenize = (stream, inQuoteInterpolation = no) ->
 					if name == 'use'
 						stream.takeWhile /[ ]/
 						tokenizeUse stream.pos(), (stream.takeUpTo /\s/).trim()
+					else if name == 'doc'
+						lexQuote stream, indent, 'doc'
 					else if name in keywords
 						new T.Keyword stream.pos(), name
 					else
@@ -168,7 +166,7 @@ module.exports = tokenize = (stream, inQuoteInterpolation = no) ->
 						cFail stream.pos(), 'Line is indented more than once.'
 
 				when maybeTake /"/
-					lexQuote stream, indent
+					lexQuote stream, indent, '"'
 
 				when maybeTake /`/
 					pos = stream.pos()

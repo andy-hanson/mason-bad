@@ -4,6 +4,7 @@ module.exports =
 	AssignSingle: require './AssignSingle'
 	AssignDestructure: require './AssignDestructure'
 	Block: require './Block'
+	BlockBody: require './BlockBody'
 	BlockWrap: require './BlockWrap'
 	Call: require './Call'
 	Case: require './Case'

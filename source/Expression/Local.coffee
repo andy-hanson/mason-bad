@@ -29,3 +29,6 @@ module.exports = class Local extends Assignable
 			mangle @name()
 		else
 			[ 'var ', mangle @name() ]
+
+	@res: (pos) ->
+		new Local pos, 'res'

@@ -1,63 +1,135 @@
+use .alias for Real
 use .Bool for and
+use .comparisons for compare < == > <= >=
 use .js-util for identical?
+use .methods for implement
 
 +. |a:Real b:Real
+	doc
+		Sum of `a` and `b` (addition).
+		Commutative.
+
 	`a + b`
 
 -. |a:Real b:Real
+	doc
+		Difference between `a` and `b` (subtraction).
+		Negative is `b` is more than `a`.
+		`- a b` should always equal `neg (- b a)`
+
 	`a - b`
 
 neg. |a:Real
+	doc
+		Opposite of `a` (negation).
+		`neg (neg a)` should always equal `a`.
+
 	`-a`
 
 *. |a:Real b:Real
+	doc
+		Product of `a` and `b` (multiplication).
+		This should equal the sum of `b` copies of `a`, or vice versa.
+		Commutative.
+
 	`a * b`
 
 /. |a:Real b:Real
+	doc
+		Ratio of `a` to `b` (division).
+		`* (/ a b) b` should approximate `a` unless `b` is small.
+		`Infinity` if `b` is 0; `neg Infinity` if `b` is `-0`.
+
 	`a / b`
 
 remainder. |a:Real b:Real
+	doc
+		Remainder after dividing `a` by `b`, also called "a modulo b".
+		Negative if `/ a b` is negative.
+		`+ (remainder a b) (* b (round-towards-zero (/ a b)))`
+		should approximate `a`.
+		However, due to floating point error,
+		this does not work for, say, `a` as `0.5` and `b` as `0.1`.
+
 	`a % b`
 
 ^. |a:Real b:Real
+	doc
+		Power of `a` to `b` (exponentiation).
+		If `b` is an Int, this is the product of `b` copies of `a`.
+
 	Math.pow a b
 
 log-e. |a:Real
+	doc
+		Logarithm of `a`, base Euler's number (natural logarithm).
+
 	Math.log a
 
 log. |a:Real b:Real
+	doc
+		Logarithm of `a` base `b`.
+		`^ b (log a b)` should approximate `a` unless `b` is small.
+
 	/ (log-e a) (log-e b)
 
 square. |a:Real
+	doc
+		Fast computation of `^ a 2`.
+
 	* a a
 
 square-root. |a:Real
+	doc
+		Fast computation of `^ a 0.5`
+
 	forbid-not-a-number (Math.sqrt a)
 
-nth-root. |a:Real n:Real
-	^ a (^-1 n)
-
 abs. |a:Real
+	doc
+		Absolute value (also called magnitude).
+		Forces `a` to be non-negative..
+
 	Math.abs a
 
 increment. |a:Int
+	doc
+		One more than `a`.
+
 	+ a 1
 
 decrement. |a:Int
+	doc
+		One less than `a`.
+
 	- a 1
 
 round-towards-0. |a:Real
+	doc
+		Rounds down the *magnitude* of `a`.
+
 	`a | 0`
 
 round. |a:Real
+	doc
+		Whole number closest to `a`.
+		Rounds up when exactly halfway between two integers.
+
 	Math.round a
 
 round-down. |a:Real
+	doc
+		The greatest integer less than `a`.
+
 	Math.floor a
 
 round-up. |a:Real
+	doc
+		The lowest integer higher than `a`.
+
 	Math.ceil a
 
+\\\
 whole?. |a:Real
 	case a
 		not (finite? _)
@@ -70,75 +142,29 @@ whole?. |a:Real
 			True
 		else
 			False
+\\\
+
 
 divisible?. |divided:Real divisor:Real
-	zero? (remainder divided divisor)
+	doc
+		Whether two numbers are *exactly* divisible.
+		Due to floating-point error, this may return false negatives.
 
+	identical? 0 (remainder divided divisor)
 
-zero?. |a:Real
-	identical? a 0
-
-positive-zero?. |a:Real
-	and (zero? a) |
-		positive? (^-1 a)
-
-negative-zero?. |a:Real
-	and (zero? a) |
-		not (positive? (^-1 a))
-
-sign. |a:Real
-	case a
-		positive? _
-			1
-		negative? _
-			-1
-		positive-zero? _
-			0
-		negative-zero? _
-			-0
-		else
-			Number.NaN
 
 positive?. |a:Real
+	doc
+		Whether `a` exceeds 0.
+		`0` is not positive.
+
 	> a 0
 
 negative?. |a:Real
+	doc
+		Whether `a` is less than 0.
+		`0` is not negative.
+
 	< a 0
 
-finite?. |a:Real
-	Number.isFinite a
-
-not-a-number?. |a:Real
-	Number.isNaN a
-
-
-sin. |a:Real
-	Math.sin a
-cos. |a:Real
-	Math.cos a
-tan. |a:Real
-	Math.tan a
-arc-cos. |a:Real
-	\ out
-	\	forbid (not-a-number? res)
-	Math.acos a
-arc-sin. |a:Real
-	\ out
-	\	forbid (not-a-number? res)
-	forbid-not-a-number (Math.asin a)
-arc-tan. |a:Real
-	Math.atan a
-
-
-\ TODO: these should be generic
-
-<. |a:Real b:Real
-	`a < b`
->. |a:Real b:Real
-	`a > b`
-<=. |a:Real b:Real
-	`a <= b`
->=. |a:Real b:Real
-	`a >= b`
-
-
+implement compare Real -

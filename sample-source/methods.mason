@@ -1,0 +1,22 @@
+use .alias for Fun
+use .js-util for exists?
+
+method. |opts
+	name:Str = opts.name
+	theMethod = |
+		implementation = `arguments[0]['_'+name]`
+		`if (implementation == null) throw new Error("Method " + name + " not defined for " + arguments[0])`
+		implementation.apply () `arguments`
+	theMethod.methodName = name
+
+	case opts.default
+		exists? _
+			implement theMethod Object _
+		else
+			()
+
+	theMethod
+
+implement. |method:Fun type:Fun implementation:Fun
+	name:Str = method.methodName
+	`type.prototype['_'+name]` = implementation

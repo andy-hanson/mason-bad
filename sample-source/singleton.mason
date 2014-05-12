@@ -1,0 +1,13 @@
+use .alias for Fun
+
+|opts
+	super:Fun = opts.super
+	name:Str = opts.name
+
+	s = Object.create opts.super.prototype
+	s.toString = |
+		name
+	s.inspect = |
+		name
+
+	s

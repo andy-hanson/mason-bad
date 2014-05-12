@@ -38,14 +38,24 @@ patterns:
     comment: Interpolation
     match: \{[^\}]*\}
 
-
-
 - name: support.other
   comment: JavaScript literal
   match: "`[^`]*`"
 
+
+- name: entity.other
+  comment: Docstring
+  begin: ^\s*(doc)$
+  beginCaptures:
+    '1':
+      name: keyword
+  end: ^\s*(in|out)?$ # 'in', 'out', or blank line
+  endCaptures:
+    '1':
+      name: keyword
+
 - name: keyword
-  match: \b(use|for|case|else|res|_)\b
+  match: \b(use|for|case|else|in|out|res|_)\b
 - name: keyword
   comment: \@ on its own or before a property
   match: \@

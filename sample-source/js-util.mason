@@ -1,0 +1,23 @@
+use .alias for Fun
+
+identical?. |a b
+	`a === b`
+
+new. |constructor:Function
+	boundConstructor =
+		constructor.bind constructor (arguments.slice 1)
+
+	`new boundConstructor`
+
+send. |object name:String
+	`object[name].apply(object, arguments.slice(2))`
+
+\ True unless a is null or undefined.
+exists?. |a
+	`a != null`
+
+is-a?. |a type:Fun
+	`Object(a) instanceof type`
+
+truthy?. |:Bool a
+	`!!a`

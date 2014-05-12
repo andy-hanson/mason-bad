@@ -1,8 +1,19 @@
-use .Option for Some None force
 log! = console.log
+
+
+use .comparisons for compare < == > <= >=
+use .arithmetic
+
+log! (<= 1 2)
+
+
+
+\\\
+use .Option for Some None force
 
 log! (Option 3)
 log! (Option undefined)
+\\\
 
 \\\
 use source-map-support
@@ -11,7 +22,6 @@ use .Bool for True False and or not nand nor xor
 use .arithmetic for + - * / < > abs
 use .control for ? if unless while times
 use .Vec2
-log! = console.log
 use .method for method implement
 
 

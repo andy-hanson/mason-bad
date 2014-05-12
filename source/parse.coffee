@@ -25,17 +25,63 @@ class Parser
 		new E.BlockWrap Pos.start(), @block tokens
 
 	###
-	Parses the contents of a block.
-	The caller must determine whether it will be in a BlockWrap or Fun.
-	@return [Block]
+	@param lines [Array<Array<Token>>]
+	@return
+	  inLines: Array<Expression>
+	  outLines: Array<Expression>
+	  rest:Array<Array<Token>>
 	###
-	block: (tokens) ->
-		typeEach tokens, T.Token
+	blockExtra: (lines) ->
+		inLines = [ ]
+		outLines = [ ]
+
+		# Must be in order: `doc`, `in`, `out`
+
+		if (T.keyword 'in') lines[0]?[0]
+			inLines = @subBlock lines[0]
+			lines = tail lines
+
+		if (T.keyword 'out') lines[0]?[0]
+			outLines = @subBlock lines[0]
+			lines = tail lines
+
+		inLines: inLines
+		outLines: outLines
+		restLines: lines
+
+	###
+	@return [Array<Expression>]
+	###
+	subBlock: (tokens) ->
+		[ opener, rest ] =
+			unCons tokens
+		[ before, blockTokens ] =
+			@takeIndentedFromEnd rest
+		cCheck (isEmpty before), opener.pos(), ->
+			"Expected indented block after #{opener}"
 
 		lines =
-			(splitWhere tokens, T.keyword '\n').filter (line) ->
+			(splitWhere blockTokens, T.keyword '\n').filter (line) ->
 				not isEmpty line
 
+		{ lineExprs, allKeys, isList } =
+			@blockBody lines
+
+		cCheck (isEmpty allKeys), opener.pos(),
+			'Sub-blocks do not return values and should not have dict entries.'
+		cCheck (not isList), opener.pos(),
+			'Sub-blocks do not return values and should not have list elements.'
+
+		lineExprs
+
+	###
+	@param lines [Array<Array<Token>>]
+	@return
+	  lineExprs: Array<Expression>
+	  allKeys: Array<String>
+	  isList: Boolean
+	###
+	blockBody: (lines) ->
 		lineExprs = []
 		allKeys = []
 		isList = no
@@ -56,15 +102,40 @@ class Parser
 				isList ||= content instanceof E.ListElement
 				allKeys.push newKeys...
 
-		if isList
-			cCheck (isEmpty allKeys), @_pos,
-				'Block contains both list and dict elements.'
+		lineExprs: lineExprs
+		allKeys: allKeys
+		isList: isList
 
-			E.Block.List @_pos, lineExprs
-		else if isEmpty allKeys
-			E.Block.Plain @_pos, lineExprs
-		else
-			E.Block.Dict @_pos, lineExprs, allKeys
+	###
+	Parses the contents of a block.
+	The caller must determine whether it will be in a BlockWrap or Fun.
+	@return [Block]
+	###
+	block: (tokens) ->
+		typeEach tokens, T.Token
+
+		lines =
+			(splitWhere tokens, T.keyword '\n').filter (line) ->
+				not isEmpty line
+
+		{ inLines, outLines, restLines } =
+			@blockExtra lines
+
+		{ lineExprs, allKeys, isList } =
+			@blockBody restLines
+
+		body =
+			if isList
+				cCheck (isEmpty allKeys), @_pos,
+					'Block contains both list and dict elements.'
+
+				E.BlockBody.List @_pos, lineExprs
+			else if isEmpty allKeys
+				E.BlockBody.Plain @_pos, lineExprs
+			else
+				E.BlockBody.Dict @_pos, lineExprs, allKeys
+
+		new E.Block @_pos, body, inLines, outLines
 
 	###
 	Parse an entire case statement.
@@ -334,12 +405,16 @@ class Parser
 	takeIndentedFromEnd: (tokens) ->
 		typeEach tokens, T.Token
 
-		[ before, block ] =
-			rightUnCons tokens
-		cCheck ((T.group '→') block), @_pos, ->
-			"Expected to end in block, not #{block}"
+		if isEmpty tokens
+			[ tokens, [ ] ]
 
-		[ before, block.body() ]
+		else
+			[ before, block ] =
+				rightUnCons tokens
+			cCheck ((T.group '→') block), @_pos, ->
+				"Expected to end in block, not #{block}"
+
+			[ before, block.body() ]
 
 
 	###
@@ -421,7 +496,11 @@ class Parser
 			destructure =
 				new E.AssignDestructure use.pos(), forThese, moduleLocal, isMutate
 
-			E.Block.Plain use.pos(), [ moduleAssign, destructure ]
+			# TODO: this is rather hackish.
+			# Put the assign and destructure into a block.
+			body =
+				E.BlockBody.Plain use.pos(), [ moduleAssign, destructure ]
+			new E.Block use.pos(), body, [], []
 
 ###
 Finds the `Expression` that the `tokens` represent.

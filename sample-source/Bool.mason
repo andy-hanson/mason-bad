@@ -1,0 +1,29 @@
+use .extend!
+
+Bool.
+	Boolean
+
+extend! Bool
+	True.
+		`true`
+
+	False.
+		`false`
+
+	not. |a:Bool
+		`!a`
+
+	and. |a:Bool b:Act
+		`a && b()`
+
+	or. |a:Bool b:Act
+		`a || b()`
+
+	nand. |a:Bool b:Act
+		not (and a b)
+
+	nor. |a:Bool b:Act
+		not (or a b)
+
+	xor. |a:Bool b:Bool
+		`a !== b`

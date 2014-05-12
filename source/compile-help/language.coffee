@@ -50,6 +50,8 @@ Maps group openers to closers.
 	'else',
 	'use',
 	'for',
+	'in',
+	'out',
 	'=',
 	':='
 	'.',

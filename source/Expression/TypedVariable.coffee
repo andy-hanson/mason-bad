@@ -45,8 +45,8 @@ module.exports = class TypedVariable extends Expression
 			test =
 				typeTest name, @_type
 			err =
-				[	'throw new Error("\'',
-					name, '\' is no ', @_type,
+				[	'throw new Error("`',
+					name, '` is no ', @_type,
 					', it\'s " + ', (mangle name), ')' ]
 			checkCode =
 				[ 'if (!(', test, '))\n', context.indent(), '\t', err ]

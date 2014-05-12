@@ -219,6 +219,25 @@ You can also describe your types in more detail using `[]`. Everything in the br
 
 
 
+Conditions
+---
+
+You can add code at the beginning and end of functions to check that everything is right.
+
+	half. |:Int a:Int
+		in
+			assert (divisible? a 2)
+		out
+			(* res 2).should.equal a
+
+		/ a 2
+
+Here we are using assertions from (Chai)[chaijs.com], but anything could be used.
+Note the special variable `res`; this is created at the end of every function.
+(By the way, type checks on arguments happen *before* `in` conditions,
+and return type checks happen *after* `out` conditions.)
+
+
 Case
 ---
 

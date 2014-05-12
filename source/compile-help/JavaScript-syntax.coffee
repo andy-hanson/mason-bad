@@ -68,7 +68,7 @@ javaScriptKeywords =
 	""".split '\n'
 
 illegalJavaScriptNameChar =
-	rgx /[^a-zA-Z0-9]/g
+	rgx /[^a-zA-Z0-9_]/g
 
 ###
 False if `name` will pass as a regular JavaScript variable name.
@@ -89,9 +89,7 @@ These names use `_` as an escape character.
 @mangle = (name) ->
 	type name, String
 
-	if name == '_'
-		name
-	else if name in javaScriptKeywords
+	if name in javaScriptKeywords
 		"_#{name}"
 	else
 		name.replace illegalJavaScriptNameChar, (ch) ->

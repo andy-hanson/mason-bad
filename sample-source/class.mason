@@ -1,0 +1,114 @@
+use .alias for Fun
+use .Bool for True False
+use .extend!
+use .js-util for exists? truthy?
+
+make-inspect = |name
+	|
+		props =
+			(Object.keys @).map @|key
+				"{key}: {`_this[key]`}"
+
+		"{name}({props.join ", "})"
+
+make-constructor = |name members mutable
+	assigns =
+		members.map |member
+			"this[\"{member}\"] = members[\"{member}\"]"
+
+	maybeFreeze = case mutable
+		_
+			"Object.freeze(this)"
+		else
+			""
+
+	body = "
+		return function {name}(members)
+		\{
+			if (this instanceof {name})
+			\{
+				{assigns.join ";\n\t\t"}
+				{maybeFreeze}
+			}
+			else
+			\{
+				return new {name}(members)
+			}
+		}
+
+	\console.log body
+
+	(Function body) ()
+
+
+`return` |opts
+	name:Str = opts.name
+	super = `(opts.super == null) ? Object : opts.super`
+	members = opts.members
+	instance = opts.instance
+	static = opts.static
+
+	ctr = null
+	proto = Object.create super.prototype
+
+	case members
+		truthy? _
+			memberKeys:Array[String] = Object.keys opts.members
+			mutable:Bool = truthy? opts.mutable
+
+			ctr := make-constructor name memberKeys mutable
+			ctr.prototype = proto
+			inspector = make-inspect name
+			proto.toString = inspector
+			proto.inspect = inspector
+			ctr
+
+			memberKeys.forEach |member
+				`ctr["get-"+member]` = |instance
+					`instance[member]`
+				case mutable
+					_
+						`ctr["set-"+member+"!"]` = |instance value
+							`instance[member]` = value
+					else
+						()
+
+		else
+			factory = opts.factory
+			ctr := case factory
+				exists? _
+					_
+				else
+					ctrCtr = Function "
+						return function {name}()
+						\{
+							throw new Error("Tried to construct abstract class {name}")
+						}
+
+					ctrCtr ()
+
+	ctr.prototype = proto
+
+	case static
+		:Fun[Fun -> Dict]
+			statics = static ctr
+			extend! ctr statics
+		\ TODO: not exists
+		else
+			()
+
+	ctr
+
+376
+\\\
+abstract-class. |opts
+	fun = |
+		()
+	fun.name = opts.name
+	super = `(opts.super == null) ? Object : opts.super`
+	fun.prototype = Object.create super.prototype
+
+	`for (var key in opts.static) fun[key] = opts.static[key]`
+
+	fun
+\\\

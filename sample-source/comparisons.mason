@@ -1,0 +1,21 @@
+use .methods for method
+
+compare. method
+	name. "compare"
+
+<. |a b
+	`compare(a, b) < 0`
+
+>. |a b
+	`compare(a, b) > 0`
+
+<=. |a b
+	`compare(a, b) <= 0`
+
+>=. |a b
+	`compare(a, b) >= 0`
+
+==. method
+	name. "=="
+	default. |a b
+		`(a === b) || compare(a, b) === 0`
