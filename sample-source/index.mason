@@ -1,12 +1,9 @@
+use source-map-support
+source-map-support.install null
 log! = console.log
 
-
-use .comparisons for compare < == > <= >=
-use .arithmetic
-
-log! (<= 1 2)
-
-
+use .Option
+log! (Option 3)
 
 \\\
 use .Option for Some None force
@@ -16,8 +13,6 @@ log! (Option undefined)
 \\\
 
 \\\
-use source-map-support
-\source-map-support.install ()
 use .Bool for True False and or not nand nor xor
 use .arithmetic for + - * / < > abs
 use .control for ? if unless while times

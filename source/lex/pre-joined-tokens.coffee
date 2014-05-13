@@ -1,18 +1,19 @@
-Pos = require '../compile-help/Pos'
-T = require '../Token'
-Stream = require './Stream'
-GroupPre = require './GroupPre'
-lexQuote = require './lexQuote'
 { cFail, cCheck } = require '../compile-help/check'
+Pos = require '../compile-help/Pos'
 { char, keywords } = require '../compile-help/language'
 { type } = require '../help/check'
 { dropWhile, isEmpty, last, repeat } = require '../help/list'
+T = require '../Token'
+GroupPre = require './GroupPre'
+lexQuote = require './lex-quote'
+lexNumber = require './lex-number'
+Stream = require './Stream'
 
 ###
 Gets a `Use` token out of a string.
 @return [Use]
 ###
-tokenizeUse = (pos, str) ->
+lexUse = (pos, str) ->
 	type pos, Pos, str, String
 
 	parts =
@@ -29,7 +30,7 @@ tokenizeUse = (pos, str) ->
 ###
 Converts a string into tokens, including `GroupPre`s.
 ###
-module.exports = tokenize = (stream, inQuoteInterpolation = no) ->
+module.exports = preJoinedTokens = (stream, inQuoteInterpolation = no) ->
 	type stream, Stream, inQuoteInterpolation, Boolean
 
 	removePrecedingNewLine = ->
@@ -53,7 +54,8 @@ module.exports = tokenize = (stream, inQuoteInterpolation = no) ->
 	indent = 0
 
 	while ch = stream.peek()
-		pos = stream.pos()
+		pos =
+			stream.pos()
 
 		if inQuoteInterpolation and ch == '}'
 			stream.skip()
@@ -67,9 +69,12 @@ module.exports = tokenize = (stream, inQuoteInterpolation = no) ->
 		token =
 			switch
 				when (match char.digit) or (ch == '-' and char.digit.xtest stream.peek 1)
-					first = stream.readChar()
-					num = stream.takeWhile char.number
-					new T.NumberLiteral pos, "#{first}#{num}"
+					numString =
+						stream.takeWhile char.number
+					num =
+						lexNumber numString, pos
+
+					new T.NumberLiteral pos, num
 
 				when maybeTake char.groupPre
 					new GroupPre stream.pos(), ch
@@ -97,7 +102,7 @@ module.exports = tokenize = (stream, inQuoteInterpolation = no) ->
 					name = takeName()
 					if name == 'use'
 						stream.takeWhile /[ ]/
-						tokenizeUse stream.pos(), (stream.takeUpTo /\s/).trim()
+						lexUse stream.pos(), (stream.takeUpTo /\s/).trim()
 					else if name == 'doc'
 						lexQuote stream, indent, 'doc'
 					else if name in keywords
@@ -169,10 +174,13 @@ module.exports = tokenize = (stream, inQuoteInterpolation = no) ->
 					lexQuote stream, indent, '"'
 
 				when maybeTake /`/
-					pos = stream.pos()
-					text = stream.takeUpTo /`/
-					stream.skip()
-					new T.JSLiteral pos, text
+					# Javascript literal
+					text = stream.takeUpTo /[`\n]/
+					switch stream.readChar()
+						when '`'
+							new T.JSLiteral pos, text
+						else
+							cFail pos, "Unclosed Javascript literal"
 
 				else
 					cFail pos, "Unrecognized character '#{ch}'"

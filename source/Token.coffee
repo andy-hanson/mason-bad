@@ -69,11 +69,11 @@ class NumberLiteral extends Literal
 	@param _value [String]
 	###
 	constructor: (@_pos, @_value) ->
-		type @_pos, Pos, @_value, String
+		type @_pos, Pos, @_value, Number
 
 	# @noDoc
 	toJS: ->
-		# Encase in parentheses to avoid `1.sin` sort of error.
+		# Encase in parentheses to avoid a `1.sin` sort of error.
 		"(#{@_value})"
 
 ###

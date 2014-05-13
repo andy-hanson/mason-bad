@@ -44,14 +44,18 @@ module.exports = class Block extends Expression
 
 		allLines.push lines...
 
-		@_outLines.forEach (line) ->
-			allLines.push line.toNode context
-
 		if returnType?
 			tv = new TypedVariable (Local.res @pos()), returnType
 			allLines.push tv.typeCheck context
 
+		@_outLines.forEach (line) ->
+			allLines.push line.toNode context
+
+
 		if madeRes
 			allLines.push [ 'return res' ]
+		else
+			# This may be inside a CasePart, in which case we'd need a return.
+			allLines.push [ 'return' ]
 
 		interleave allLines, [ ';\n', context.indent() ]

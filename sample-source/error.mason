@@ -18,27 +18,19 @@ catch-opt. |try:Act
 catch |try:Fun
 	force (catch-opt try) "Expected to throw an error."
 
-fail!. |explain
-	`throw new Error((explain == null) ? "Failed!" : explain)`
-	()
-
 throw!. |error
 	case error
 		:Error
 			`throw error`
-		else
+		exists? error
 			`throw new Error(error)`
-
-throws?. |try:Act
-	try-catch
-		try ()
-		False
-	|
-		True
+		else
+			`throw new Error("Failed!")`
 
 try. |try:Act
 	try-catch
-		Some (try ())
+		Some
+			value. do try
 	|
 		None
 
@@ -46,11 +38,8 @@ try-catch. |try:Act catch:Fun[Error]
 	try-catch-finally try catch |
 		()
 
-try-catch-finally |try:Act catch:Fun[Error] finally:Act
+try-catch-finally |try:Act catch:Fun[Error -> Any] finally:Act
 	`var res;`
 	`try { res = _try(); }`
 	`catch (error) { res = _catch(error); }`
 	`finally { _finally(); }`
-	res
-
-

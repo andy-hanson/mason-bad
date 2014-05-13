@@ -1,7 +1,8 @@
 use .alias for Fun
 use .Bool for True False
 use .extend!
-use .js-util for exists? truthy?
+use .js-util for do exists? truthy?
+use .mangle
 
 make-inspect = |name
 	|
@@ -11,19 +12,33 @@ make-inspect = |name
 
 		"{name}({props.join ", "})"
 
-make-constructor = |name members mutable
+make-constructor = |name members mutable short?
 	assigns =
-		members.map |member
-			"this[\"{member}\"] = members[\"{member}\"]"
+		members.map |member index
+			access = case short?
+				_
+					mangle member
+				else
+					"members[\"{member}\"]"
+
+			"this[\"{member}\"] = {access}"
 
 	maybeFreeze = case mutable
 		_
-			"Object.freeze(this)"
-		else
 			""
+		else
+			"Object.freeze(this)"
+
+	arguments = case short?
+		_
+			(members.map mangle).join ", "
+		else
+			"members"
+
+	mangled-name = mangle name
 
 	body = "
-		return function {name}(members)
+		return function {mangled-name}({arguments})
 		\{
 			if (this instanceof {name})
 			\{
@@ -32,16 +47,16 @@ make-constructor = |name members mutable
 			}
 			else
 			\{
-				return new {name}(members)
+				return new {mangled-name}({arguments})
 			}
 		}
 
-	\console.log body
+	console.log body
 
 	(Function body) ()
 
 
-`return` |opts
+|opts
 	name:Str = opts.name
 	super = `(opts.super == null) ? Object : opts.super`
 	members = opts.members
@@ -50,20 +65,35 @@ make-constructor = |name members mutable
 
 	ctr = null
 	proto = Object.create super.prototype
+	construct = opts.construct
+	is-concrete = exists? construct
 
-	case members
-		truthy? _
-			memberKeys:Array[String] = Object.keys opts.members
+	case is-concrete
+		_
+			member-keys:Array[String] = Object.keys opts.members
 			mutable:Bool = truthy? opts.mutable
 
-			ctr := make-constructor name memberKeys mutable
-			ctr.prototype = proto
+			case construct
+				= "short"
+					ctr := make-constructor name member-keys mutable True
+
+				= "from-dict"
+					ctr := make-constructor name member-keys mutable False
+
+				:Function
+					ctr := |
+						`(this instanceof ctr) ? construct.apply(this, arguments) : new (ctr.bind(ctr, arguments))`
+
+				else
+					`throw new Error("Bad construct for " + name + ": " + construct)`
+					()
+
 			inspector = make-inspect name
 			proto.toString = inspector
 			proto.inspect = inspector
-			ctr
 
-			memberKeys.forEach |member
+
+			member-keys.forEach |member
 				`ctr["get-"+member]` = |instance
 					`instance[member]`
 				case mutable
@@ -79,15 +109,18 @@ make-constructor = |name members mutable
 				exists? _
 					_
 				else
-					ctrCtr = Function "
-						return function {name}()
+					make-ctr = Function "
+						return function {mangle name}()
 						\{
 							throw new Error("Tried to construct abstract class {name}")
 						}
 
-					ctrCtr ()
+					do make-ctr
+
+
 
 	ctr.prototype = proto
+
 
 	case static
 		:Fun[Fun -> Dict]
@@ -99,16 +132,3 @@ make-constructor = |name members mutable
 
 	ctr
 
-376
-\\\
-abstract-class. |opts
-	fun = |
-		()
-	fun.name = opts.name
-	super = `(opts.super == null) ? Object : opts.super`
-	fun.prototype = Object.create super.prototype
-
-	`for (var key in opts.static) fun[key] = opts.static[key]`
-
-	fun
-\\\

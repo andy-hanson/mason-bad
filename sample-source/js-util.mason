@@ -1,16 +1,17 @@
-use .alias for Fun
+use .alias for Act Fun
 
 identical?. |a b
 	`a === b`
 
 new. |constructor:Function
-	boundConstructor =
-		constructor.bind constructor (arguments.slice 1)
-
+	boundConstructor = constructor.bind constructor (arguments.slice 1)
 	`new boundConstructor`
 
 send. |object name:String
-	`object[name].apply(object, arguments.slice(2))`
+	(property object name).apply object (arguments.slice 2)
+
+property. |object name:String
+	`object[name]`
 
 \ True unless a is null or undefined.
 exists?. |a
@@ -21,3 +22,7 @@ is-a?. |a type:Fun
 
 truthy?. |:Bool a
 	`!!a`
+
+do. |todo:Act
+	`todo()`
+

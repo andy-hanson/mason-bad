@@ -29,10 +29,6 @@ do-until. |do:Fun condition:Act
 	`do { _do() } while (!condition())`
 	()
 
-times. |n:Int do:Act
-	`for (var i = 0; i < n; ++i) { _do(i) }`
-	()
-
 returning. |value do-after:Fun
 	do-after value
 	value

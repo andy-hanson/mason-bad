@@ -14,18 +14,14 @@ allQuoteTypes =
 Gets the parts of a quote.
 @return [Group or []]
   If this is a `"` quote, returns it.
-  Else, returns an empty array (which ignores the docstring.)
+  Else, returns an empty array (we ignore the docstring).
 ###
 module.exports = lexQuote = (stream, oldIndent, quoteType) ->
 	type stream, Stream, oldIndent, Number
 	check quoteType in allQuoteTypes
 
-	tokenize =
-		require './tokenize'
-
-	read = ''
-	out = [ ]
-	startPos = stream.pos()
+	# Must require this in here or there is a require loop.
+	preJoinedTokens = require './pre-joined-tokens'
 
 	indented =
 		stream.peek() == '\n'
@@ -36,6 +32,11 @@ module.exports = lexQuote = (stream, oldIndent, quoteType) ->
 
 	quoteIndent =
 		oldIndent + 1
+
+	read = ''
+	out = [ ]
+	startPos = stream.pos()
+
 
 	finish = ->
 		switch quoteType
@@ -82,7 +83,7 @@ module.exports = lexQuote = (stream, oldIndent, quoteType) ->
 			startPos =
 				stream.pos()
 			interpolated =
-				tokenize stream, yes
+				preJoinedTokens stream, yes
 
 			out.push new T.Group startPos, '(', interpolated
 

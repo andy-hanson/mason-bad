@@ -18,7 +18,7 @@ Character classes used during tokenization.
 	digit:
 		rgx /[0-9]/
 	number:
-		rgx /[0-9\.]/
+		rgx /[\-0-9_.\/e]/
 	groupPre:
 		rgx /[\(\)]/
 	space:

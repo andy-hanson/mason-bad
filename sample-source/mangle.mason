@@ -1,0 +1,74 @@
+javaScriptKeywords = "
+	abstract
+	arguments
+	boolean
+	break
+	byte
+	case
+	catch
+	char
+	class
+	comment
+	const
+	continue
+	debugger
+	default
+	delete
+	do
+	double
+	else
+	enum
+	eval
+	export
+	extends
+	false
+	final
+	finally
+	float
+	for
+	function
+	goto
+	if
+	implements
+	import
+	in
+	instanceOf
+	int
+	interface
+	label
+	long
+	native
+	new
+	package
+	private
+	protected
+	public
+	return
+	short
+	static
+	super
+	switch
+	synchronized
+	this
+	throw
+	throws
+	transient
+	true
+	try
+	typeof
+	var
+	void
+	while
+	with
+
+javaScriptKeywords := javaScriptKeywords.split "\n"
+
+illegalJavaScriptNameChar = `/[^a-zA-Z0-9_]/g`
+
+|name:Str
+	case name
+		`javaScriptKeywords.indexOf(_) !== -1`
+			"_{name}"
+		else
+			name.replace illegalJavaScriptNameChar |ch
+				"_{ch.charCodeAt 0}"

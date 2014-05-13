@@ -129,20 +129,6 @@ round-up. |a:Real
 
 	Math.ceil a
 
-\\\
-whole?. |a:Real
-	case a
-		not (finite? _)
-			False
-		< _ -9007199254740992
-			False
-		> _ 9007199254740992
-			False
-		= round-towards-zero _
-			True
-		else
-			False
-\\\
 
 
 divisible?. |divided:Real divisor:Real

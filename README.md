@@ -6,8 +6,8 @@ mason
 			. "declarative"
 			. "functional"
 		status.
-			"experimental"
-		compiles-to.
+			"nowhere near ready"
+		compile-to.
 			"JavaScript"
 
 
@@ -222,7 +222,7 @@ You can also describe your types in more detail using `[]`. Everything in the br
 Conditions
 ---
 
-You can add code at the beginning and end of functions to check that everything is right.
+You can add code at the beginning and end of functions to check that everything is OK.
 
 	half. |:Int a:Int
 		in
@@ -232,10 +232,12 @@ You can add code at the beginning and end of functions to check that everything 
 
 		/ a 2
 
-Here we are using assertions from (Chai)[chaijs.com], but anything could be used.
+Here we are using assertions from [Chai](http://chaijs.com), but anything could be used.
+
 Note the special variable `res`; this is created at the end of every function.
-(By the way, type checks on arguments happen *before* `in` conditions,
-and return type checks happen *after* `out` conditions.)
+
+(By the way, type checks happen *before* custom checks.)
+
 
 
 Case
@@ -253,9 +255,12 @@ With `case` you can neatly deal with all the potential values of a variable.
 				"lots"
 
 To test equality, use `=`.
+
 To do any other test, just write your expression on the line. `_` stands for the value you `case` on.
+
 Use `else` for a fallback. If you don't provide it and none of the tests match, an error will be thrown.
-You can also `case` on types.
+
+You can also `case` on types:
 
 	what-is-it. |a
 		case a
@@ -266,7 +271,7 @@ You can also `case` on types.
 			else
 				"Who cares?"
 
-If you want to handle many cases the same way, use `,`.
+If you want to handle many cases the same way, use `,`:
 
 	length. |a
 		case a
@@ -340,25 +345,6 @@ You shouldn't write to `module.exports` explicitly.
 
 
 
-More Quotes
----
-
-	\ Interpolation
-	"I'm pretty sure {+ 1 1} is two."
-
-
-	\ Multi-line indented quote
-	"
-		We hold these truths to be self-evident,
-		that {+ 1 1} is two.
-
-		Here's a tab: \t.
-		Some line breaks: \n\n\n.
-		And an opening curly brace: \{.
-		In a multi-line string you can use "quotes" without escaping them.
-
-
-
 @
 ---
 
@@ -393,26 +379,50 @@ You could also set up your build system to compile both Mason and JavaScript (or
 
 
 
+Strings
+---
+
+Interpolate values into a string using `{}`:
+
+	"I'm pretty sure {+ 1 1} is two."
+
+Multiline quotes can be written in an indented block:
+
+	"
+		We hold these truths to be self-evident,
+		that {+ 1 1} is two.
+		You can use "quote symbols" in block quotes.
+
+You can use `\` for certain special characters:
+
+Escape | Output
+:-: | :-:
+`\t` | Tab
+`\n` | New line
+`\{` | `{`
+`\\` | `\`
+
+
+
+Numbers
+---
+
+You can do some funky stuff with number literals.
+
+	1
+	1_234_567 \ Underscores are ignored
+	1/2 \ Fractions
+	1e6 \ Scientific notation
+
+
+
 The End
 ---
 
 What, you wanted more? Too bad! That's really all there is.
 If you want more functionality, use modules.
 
-If they existed, I'd tell you to look at some very important modules:
-
-* `control`
-* `logic`
-* `error`
-* `math`
-* `compare`
-* `js-util`
-
-But...
-
-they don't exist yet.
-
-Go play outside.
+A small standard library is in development.
 
 
 

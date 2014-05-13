@@ -2,8 +2,8 @@ Pos = require '../compile-help/Pos'
 { type } = require '../help/check'
 Options = require '../Options'
 Stream = require './Stream'
-tokenize = require './tokenize'
-joinGroups = require './joinGroups'
+preJoinedTokens = require './pre-joined-tokens'
+joinGroups = require './join-groups'
 
 ###
 Breaks a string down into tokens.
@@ -28,6 +28,6 @@ module.exports = lex = (sourceCode, options) ->
 	stream =
 		new Stream sourceCode, pos
 	preTokens =
-		tokenize stream
+		preJoinedTokens stream
 
 	joinGroups preTokens

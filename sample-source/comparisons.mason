@@ -3,6 +3,11 @@ use .methods for method
 compare. method
 	name. "compare"
 
+==. method
+	name. "=="
+	default. |a b
+		`(a === b) || compare(a, b) === 0`
+
 <. |a b
 	`compare(a, b) < 0`
 
@@ -14,8 +19,3 @@ compare. method
 
 >=. |a b
 	`compare(a, b) >= 0`
-
-==. method
-	name. "=="
-	default. |a b
-		`(a === b) || compare(a, b) === 0`

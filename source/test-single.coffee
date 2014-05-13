@@ -5,11 +5,15 @@ Options = require './Options'
 prelude = ''
 
 str = '''
-a = 2
+case a
+	_
+		x = 3
+	else
+		y
 '''
 
 command =
-	'tokens'
+	'output'
 
 options =
 	fileName: 'sample-in'

@@ -8,13 +8,13 @@ Option = class
 	factory. |x
 		case x
 			exists? x
-				Option.Some
-					value. x
+				Option.Some x
 			else
 				Option.None
 
 	static. |Option
 		Some. class
+			construct. "short"
 			name. "Some"
 			super. Option
 			members.

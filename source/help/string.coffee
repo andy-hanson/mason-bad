@@ -6,3 +6,5 @@
 @repeated = (str, times) ->
 	([0 ... times].map -> str).join ''
 
+@tail = (str) ->
+	str.slice 1

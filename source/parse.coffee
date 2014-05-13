@@ -475,11 +475,9 @@ class Parser
 			new E.Local use.pos(), use.localName()
 		_var =
 			new E.TypedVariable moduleLocal, null
-		moduleAssign =
-			new E.AssignSingle use.pos(), _var, used, isMutate
 
 		if tokens.length == 1
-			moduleAssign
+			new E.AssignSingle use.pos(), _var, used, isMutate
 		else
 			[ _, _for, whatFor... ] = tokens
 			cCheck ((T.keyword 'for') _for), _for.pos(), ->
@@ -493,14 +491,8 @@ class Parser
 					loc = new E.Local x.pos(), x.text()
 					new E.TypedVariable loc, null
 
-			destructure =
-				new E.AssignDestructure use.pos(), forThese, moduleLocal, isMutate
+			new E.AssignDestructure use.pos(), forThese, used, isMutate
 
-			# TODO: this is rather hackish.
-			# Put the assign and destructure into a block.
-			body =
-				E.BlockBody.Plain use.pos(), [ moduleAssign, destructure ]
-			new E.Block use.pos(), body, [], []
 
 ###
 Finds the `Expression` that the `tokens` represent.
