@@ -1,0 +1,49 @@
+Object.prototype.!subsumes = |a name
+	test = @subsumes? a
+	`if (!test) throw new Error(name + " is no " + this.name + ", it's " + a);`
+	()
+
+Function.prototype.subsumes? = |x
+	`x instanceof this`
+
+String.subsumes? = |a
+	`typeof a === "string"`
+
+Number.subsumes? = |a
+	`typeof a === "number"`
+
+Boolean.subsumes? = |a
+	`typeof a === "boolean"`
+
+Array.sub = |element-type
+	et = element-type
+
+	subsumes?. |a
+		`if (!(a instanceof Array)) return false;`
+		`for (var index = 0; index < a.length; ++index) if (!(et["subsumes?"](a[index]))) return false;`
+		`true`
+
+	!subsumes. |a name
+		`if (!(a instanceof Array)) throw new Error(name+" is not an Array, is "+a)`
+		`for (var index = 0; index < a.length; ++index) et["subsumes?"](name+"["+index+"]", a[index])`
+		()
+
+Act. Function
+
+Bool. Boolean
+
+Dict. Object
+
+Fun. Function
+
+Int.
+	name. "Int"
+	subsumes?. |n
+		\ Some day use Number.isInteger
+		`typeof n === "number" && isFinite(n) && n > -9007199254740992 && n < 9007199254740992 && Math.floor(n) === n`
+Nat.
+	name. "Nat"
+	subsumes?. |n
+		`typeof n === "number" && isFinite(n) && n >= 0 && n < 9007199254740992 && Math.floor(n) === n`
+
+Real. Number

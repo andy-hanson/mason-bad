@@ -1,0 +1,11 @@
+use .methods for method
+
+subsumes?. method
+	name. "subsumes?"
+
+!subsumes. method
+	name. "!subsumes"
+
+Type.
+	subsumes?. |a
+		dict.has? a "type-test"
