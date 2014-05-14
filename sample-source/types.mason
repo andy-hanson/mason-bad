@@ -47,3 +47,11 @@ Nat.
 		`typeof n === "number" && isFinite(n) && n >= 0 && n < 9007199254740992 && Math.floor(n) === n`
 
 Real. Number
+
+Void.
+	subsumes?. |n
+		`n == null`
+
+Any.
+	subsumes?. |n
+		`n != null`

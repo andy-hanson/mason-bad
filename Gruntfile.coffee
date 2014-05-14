@@ -13,17 +13,6 @@ module.exports = (grunt) ->
 				output: 'doc'
 
 		coffee:
-			sample:
-				expand: yes
-				flatten: no
-				cwd: 'sample-source'
-				src: [ '**/*.coffee' ]
-				dest: 'sample-js'
-				ext: '.js'
-
-				bare: yes
-				sourceMap: yes
-
 			dev:
 				expand: yes
 				flatten: no
@@ -86,7 +75,6 @@ module.exports = (grunt) ->
 
 	grunt.registerTask 'run-sample', [
 		'clean:sample',
-		'coffee:sample',
 		'mason',
 		'exec:sample'
 	]

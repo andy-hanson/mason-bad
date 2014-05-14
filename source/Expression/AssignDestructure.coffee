@@ -10,22 +10,26 @@ TypedVariable = require './TypedVariable'
 
 ###
 Represents object destructuring assignment.
-
 In:
 
-	a b = c
+	a:A b:B~c = d
 
-`names` and `a` and `b`, and `value` is `c`.
+`nameToVar` will be:
+
+	a: TypedVariable(a, A)
+	c: TypedVariable(b, B)
 ###
 module.exports = class AssignDestructure extends Expression
 	###
 	@param _pos [Pos]
-	@param _vars [Array<TypedVariable>]
+	@param _namesToVars [Dict<String, TypedVariable>]
 	@param _value [Expression]
+	@param _isMutate [Boolean]
 	###
-	constructor: (@_pos, @_vars, @_value, @_isMutate) ->
+	constructor: (@_pos, @_namesToVars, @_value, @_isMutate) ->
 		type @_pos, Pos
-		typeEach @_vars, TypedVariable
+		for key of @_namesToVars
+			type @_namesToVars[key], TypedVariable
 		type @_value, Expression, @_isMutate, Boolean
 
 	# @noDoc
@@ -44,9 +48,11 @@ module.exports = class AssignDestructure extends Expression
 			new JS @pos(), '_ref'
 
 		assigns =
-			@_vars.map (_var) =>
+			(Object.keys @_namesToVars).map (name) =>
+				_var =
+					@_namesToVars[name]
 				refMember =
-					new Member @pos(), refAccess, _var.var().name()
+					new Member @pos(), refAccess, name #_var.var().name()
 				assign =
 					new AssignSingle @pos(), _var, refMember, @_isMutate
 

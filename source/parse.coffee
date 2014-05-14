@@ -203,7 +203,9 @@ class Parser
 				if (T.keyword '=') t0
 					E.CaseTest.Equal t0.pos(), @expression (tail testTokens)
 				else
-					[ theType, rest ] = @tryTakeType tokens
+					[ theType, rest ] =
+						@tryTakeType tokens
+
 					if theType?
 						cCheck (isEmpty rest), theType.pos(),
 							"Did not expect anything after type."
@@ -279,8 +281,13 @@ class Parser
 			@takeIndentedFromEnd tokens
 		parsedBlock =
 			@block block
+		t0 =
+			argTokens[0]
 		[ returnType, tokensAfterReturnType ] =
-			@tryTakeType argTokens
+			if ((T.name ':x') t0) and t0.text() == 'Void'
+				[ (E.Type.Void t0.pos()), tail argTokens ]
+			else
+				@tryTakeType argTokens, yes
 		args =
 			@typedVariables tokensAfterReturnType
 
@@ -312,27 +319,30 @@ class Parser
 				splitted
 			@_pos =
 				assigner.pos()
-			isObjectAssign =
+			isDictAssign =
 				assigner.kind() == '.'
 			isMutateAssign =
 				assigner.kind() == ':='
-			vars =
-				# Don't allow members if it's an object assignment.
-				# So `a.b = 3` is allowed, but not `a.b. 3`.
-				@typedVariables nameTokens, not isObjectAssign
+			{ vars, names, anyRenames } =
+				@maybeRenamedVariables nameTokens
+			#vars =
+			#	# Don't allow members if it's an object assignment.
+			#	# So `a.b = 3` is allowed, but not `a.b. 3`.
+			#	@typedVariables nameTokens, not isObjectAssign
 			value =
 				@expression valueTokens
 
+			cCheck vars.length > 0, @_pos,
+				'Assign to nothing'
+
 			content:
-				switch vars.length
-					when 0
-						cFail @_pos, 'Assign to nothing'
-					when 1
-						new E.AssignSingle @_pos, vars[0], value, isMutateAssign
-					else
-						new E.AssignDestructure @_pos, vars, value, isMutateAssign
+				if vars.length > 1 or anyRenames
+					new E.AssignDestructure @_pos, names, value, isMutateAssign
+				else
+					new E.AssignSingle @_pos, vars[0], value, isMutateAssign
+
 			newKeys:
-				if isObjectAssign
+				if isDictAssign
 					vars.map (_var) ->
 						_var.var().name()
 				else
@@ -420,9 +430,9 @@ class Parser
 			[ before, block.body() ]
 
 	###
-	@return [ Expression?, Array<Token> ]
+	@return [ Type?, Array<Token> ]
 	###
-	tryTakeType: (tokens) ->
+	tryTakeType: (tokens, isReturnType) ->
 		t0 =
 			tokens[0]
 
@@ -440,11 +450,11 @@ class Parser
 				sub =
 					E.sub @_pos, local, subbed
 				tipe =
-					new E.Type sub
+					E.Type.Expression sub
 				[ tipe, tokens.slice 2 ]
 			else
 				tipe =
-					new E.Type local
+					E.Type.Expression local
 				[ tipe, tail tokens ]
 
 		else
@@ -454,7 +464,18 @@ class Parser
 	@return [Array<TypedVariable>]
 	###
 	typedVariables: (tokens) ->
-		out = []
+		{ vars, _, anyRenames } =
+			@maybeRenamedVariables tokens
+
+		cCheck (not anyRenames), @_pos,
+			'Did not expect rename'
+
+		vars
+
+	maybeRenamedVariables: (tokens) ->
+		vars = []
+		names = { }
+		anyRenames = no
 
 		until isEmpty tokens
 			local =
@@ -469,17 +490,34 @@ class Parser
 			_var = local
 			dots.forEach (dot) ->
 				_var = new E.Member dot.pos(), _var, dot.text()
-			#until isEmpty dots
-			#	_var = new E.Member dots[0].pos(), _var, dots[0].text()
-			#	dots = tail dots
 
 			[ varType, tokens ] =
 				@tryTakeType tokens
 
-			out.push new E.TypedVariable _var, varType
+			typedVar =
+				E.TypedVariable.fromMaybeType _var, varType
 
-		out
+			vars.push typedVar
 
+			[ rename, tokens ] =
+				@tryTakeRename tokens
+
+			if rename?
+				anyRenames = yes
+				names[rename] =typedVar
+			else
+				names[_var.name()] = typedVar
+
+		vars: vars
+		names: names
+		anyRenames: anyRenames
+
+
+	tryTakeRename: (tokens) ->
+		if ((T.name '~x') tokens[0])
+			[ tokens[0].text(), tail tokens ]
+		else
+			[ null, tokens ]
 
 	###
 	Throws a compiler error when a bad token is encountered.
@@ -504,7 +542,7 @@ class Parser
 		moduleLocal =
 			new E.Local use.pos(), use.localName()
 		_var =
-			new E.TypedVariable moduleLocal, null
+			E.TypedVariable.defaultTyped moduleLocal
 
 		if tokens.length == 1
 			new E.AssignSingle use.pos(), _var, used, isMutate
@@ -513,15 +551,10 @@ class Parser
 			cCheck ((T.keyword 'for') _for), _for.pos(), ->
 				"Expected 'for', got #{_for}"
 
-			forThese =
-				whatFor.map (x) ->
-					cCheck (x instanceof T.Name and x.kind() == 'x'), x.pos(), ->
-						"Expected local name, got #{x}"
+			{ _, names, _ } =
+				@maybeRenamedVariables whatFor
 
-					loc = new E.Local x.pos(), x.text()
-					new E.TypedVariable loc, null
-
-			new E.AssignDestructure use.pos(), forThese, used, isMutate
+			new E.AssignDestructure use.pos(), names, used, isMutate
 
 
 ###

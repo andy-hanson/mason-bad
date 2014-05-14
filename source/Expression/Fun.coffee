@@ -14,7 +14,7 @@ A function. All functions in Mason are anonymous.
 module.exports = class Fun extends Expression
 	###
 	@param _pos [Pos]
-	@param _returnType [String]
+	@param _returnType [Type?]
 	@param _arguments [Array<TypedVariable>]
 	@param _body [Block]
 	@param _preserveThis [Boolean]

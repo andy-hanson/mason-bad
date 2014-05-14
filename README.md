@@ -123,47 +123,43 @@ You can get many properties of a dict at once.
 Types
 ---
 
-You can give types to local variables, including dict entries.
+You can type local variables (including dict entries), function arguments, and function return values.
 
 	one:Int. 1
-	two:Int. "2" \ Fails!
+	two:Int = 2
+	string->array. |:Array str:String
+		str.split ""
 
-Function arguments can be given types as well.
-
-	decrement = |a:Int
-		- a 1
-
-	decrement 1 \ Succeeds!
-	decrement "one" \ Fails!
-
-You can specify return types by putting the type right after the `|`.
-
-	decrement = |:Int a:Int
-		"I am real legitimate Number"
-
-	decrement 1 \ Fails!
-
-Our first example might be written as:
+These compile to method calls on the type. Our first example might be written as:
 
 	one. 1
 	Int.!subsumes 1
 
-The method `!subsumes` defaults to calling the predicate method `subsumes?` and throwing an error if it fails. You can write your own custom type with just `subsumes?`, or make a fancy `!subsumes` that gives you a better error message as well.
+The method `!subsumes` defaults to calling the predicate method `subsumes?` and throwing an error if it fails.
+It may also show more information about why the check failed.
+
+Even if you don't include a type, everything is still checked to not be `undefined` or `null`.
+The type `:Void` is treated specially be the compiler and suppresses a function from returning a value.
+
+	say-hi!. |:Void
+		log! "Hi"
+
+The type `?` (available in the standard library) allows variables to possibly not be defined.
 
 
 
 Subscripts
 ---
 
-Many types rely on subscripting. `a[b]` is short-hand for `a.sub b`.
-`x:Array[Int] = y` would generate a check like `(Array.sub Int).!subsumes x`.
+`a[b]` is short for `a.sub b`.
+You can subscript types, for example `ints:Array[Int]`.
 
 
 
 Conditions
 ---
 
-You can add code at the beginning and end of functions to check that everything is OK.
+Using `in` and `out` you can make assertions before and after a function body.
 
 	half. |a
 		in
@@ -184,7 +180,7 @@ Note the special variable `res`; this is created at the end of every function.
 Case
 ---
 
-With `case` you can neatly deal with all the potential values of a variable.
+With `case` you can branch based on the value of a variable.
 
 	count-string. |a
 		case a
@@ -201,7 +197,7 @@ With `case` you can neatly deal with all the potential values of a variable.
 
 To test equality, use `=`.
 
-To test for inclusion in a type, write the type name preceded by `:`. (This calls `subsumes?`, not `!subsumes`.)
+For a type test, write the type name preceded by `:`. (This calls `subsumes?`, not `!subsumes`.)
 
 To do any other test, just write your expression on the line. `_` is the value you `case` on.
 
@@ -215,7 +211,8 @@ Multiple assignment
 ---
 
 If you write `a b = dict`, `a` will be `dict.a` and `b` will be `dict.b`.
-You can rename these: in `a~eh b~bee = dict`, `eh` will be `dict.a` and `bee` will be `dict.b`.
+You can rename these: in `a~eh b~bee = dict`, `a` will be `dict.eh` and `b` will be `dict.bee`.
+This works with dict key assignment as well, e.g. `a b. dict`.
 
 
 

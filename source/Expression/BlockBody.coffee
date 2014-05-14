@@ -1,3 +1,4 @@
+{ cFail } = require '../compile-help/check'
 { mangle, needsMangle } = require '../compile-help/JavaScript-syntax'
 Pos = require '../compile-help/Pos'
 { abstract, type, typeEach } = require '../help/check'
@@ -20,6 +21,12 @@ module.exports = class BlockBody extends Expression
 	    Whether `res` was written to.
 	###
 	makeRes: (context) ->
+		abstract()
+
+	###
+	@return Array[Chunk]
+	###
+	makeVoid: (context) ->
 		abstract()
 
 	###
@@ -62,6 +69,9 @@ class ListBody extends BlockBody
 	makeRes: (context) ->
 		[ 'var res = []' ].concat @_lines.map (line) ->
 			line.toNode context
+
+	makeVoid: (context) ->
+		cFail @pos(), "Block contains list entries and can not return Void"
 
 ###
 Creates an object literal for the given keys.
@@ -107,6 +117,9 @@ class DictBody extends BlockBody
 		lines: lines
 		madeRes: yes
 
+	makeVoid: (context) ->
+		cFail @pos(), "Block contains dict keys and can not return Void."
+
 ###
 Returns the last line if it is a pure expression, else returns `undefined`.
 ###
@@ -119,8 +132,7 @@ class PlainBody extends BlockBody
 	# @noDoc
 	makeRes: (context) ->
 		lines =
-			@_lines.map (line) ->
-				line.toNode context
+			@makeVoid context
 
 		if (last @_lines)?.pure()
 			[ leadIn, finish ] =
@@ -132,3 +144,7 @@ class PlainBody extends BlockBody
 		else
 			lines: lines
 			madeRes: no
+
+	makeVoid: (context) ->
+		@_lines.map (line) ->
+			line.toNode context

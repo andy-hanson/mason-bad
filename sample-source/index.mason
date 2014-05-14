@@ -2,27 +2,15 @@ use source-map-support
 source-map-support.install null
 log! = console.log
 
-use .Bool for True
-use .methods for method implement
-use .type-methods for type-test type-check
+use .?
 
-Poop =
-	subsumes?. |a
-		True
-	!subsumes. |a
-		log! "Inside check!"
+x:?[Number] = 3
+y:?[Number] = `undefined`
 
-a:Poop = 3
+log! x
+log! y
 
-case a
-	:Poop
-		log! "Yay!"
-	else
-		log! "Huh?"
-
-use .Option
-log! (Option 3)
-\log! (Option.force (Option null))
+z:?[Number] = "fourty-two"
 
 \\\
 use .Option for Some None force

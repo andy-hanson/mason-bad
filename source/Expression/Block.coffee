@@ -45,19 +45,29 @@ module.exports = class Block extends Expression
 		type context, Context
 		typeExist returnType, Type
 
-		allLines = []
+		allLines =
+			[]
 
 		@_inLines.forEach (line) ->
 			allLines.push line.toNode context
 
+		returns =
+			not (returnType? and returnType instanceof Type.VoidType)
+
 		{ lines, madeRes } =
-			@_body.makeRes context
+			if returns
+				@_body.makeRes context
+			else
+				lines: @_body.makeVoid context
+				madeRes: no
 
 		allLines.push lines...
 
-		if returnType?
-			tv = new TypedVariable (Local.res @pos()), returnType
-			allLines.push tv.typeCheck context
+		if returns and returnType?
+			resVar =
+				new TypedVariable (Local.res @pos()), returnType
+
+			allLines.push resVar.typeCheck context
 
 		@_outLines.forEach (line) ->
 			allLines.push line.toNode context
@@ -65,7 +75,6 @@ module.exports = class Block extends Expression
 		if madeRes
 			allLines.push [ 'return res' ]
 		else
-			# This may be inside a CasePart, in which case we'd need a return.
 			allLines.push [ 'return' ]
 
 		interleave allLines, [ ';\n', context.indent() ]

@@ -24,7 +24,7 @@ Character classes used during tokenization.
 	space:
 		rgx ' '
 	precedesName:
-		rgx /[:@\.]/
+		rgx /[:@\.~]/
 	name:
 		# If it's not used for anything else, it's a valid name!
 		rgx /[^\s\(\)\[\]\{\};,'"`\\\|@:.~#$]/
@@ -44,7 +44,7 @@ Maps group openers to closers.
 	'→': '←'
 
 @nameKinds =
-	[ 'x', '.x', '@x', ':x' ]
+	[ 'x', '.x', '@x', ':x', '~x', '...x' ]
 
 @keywords = [
 	'case',

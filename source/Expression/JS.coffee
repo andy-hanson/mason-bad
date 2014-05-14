@@ -21,3 +21,7 @@ module.exports = class JS extends Assignable
 	# @noDoc
 	assignableCode: ->
 		@_text
+
+	# @noDoc
+	name: ->
+		"<javascript literal>"

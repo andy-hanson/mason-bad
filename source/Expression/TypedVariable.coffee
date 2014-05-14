@@ -11,11 +11,10 @@ A variable and maybe a type.
 module.exports = class TypedVariable extends Expression
 	###
 	@param _var [Assignable]
-	@param _type [Expression?]
+	@param _type [Type]
 	###
 	constructor: (@_var, @_type) ->
-		type @_var, Assignable
-		typeExist @_type, Type
+		type @_var, Assignable, @_type, Type
 
 	# @noDoc
 	pos: -> @var().pos()
@@ -39,3 +38,13 @@ module.exports = class TypedVariable extends Expression
 	typeCheck: (context) ->
 		check @hasType()
 		@_type.toCheck context, @_var, @_var.name()
+
+	@fromMaybeType: (_var, varType) ->
+		if varType?
+			new TypedVariable _var, varType
+		else
+			TypedVariable.defaultTyped _var
+
+	@defaultTyped: (_var) ->
+		type _var, Assignable
+		new TypedVariable _var, new Type.Default _var.pos()

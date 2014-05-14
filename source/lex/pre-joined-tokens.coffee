@@ -82,6 +82,20 @@ module.exports = preJoinedTokens = (stream, inQuoteInterpolation = no) ->
 				when maybeTake /,/
 					new T.Keyword pos, ','
 
+				when ch == '.'
+					if /\s/.test stream.peek 1
+						stream.skip()
+						new T.Keyword pos, '.'
+					else if (stream.peek 1) == '.'
+						cCheck (stream.peek 2) == '.', pos,
+							'Two `.` in a row must be followed by a third.'
+						stream.skip 3
+						new T.Name pos, takeName(), '...x'
+					else
+						stream.skip()
+						new T.Name pos, takeName(), '.x'
+
+
 				when ch == '.' and /\s/.test stream.peek 1
 					stream.skip 1
 					new T.Keyword pos, '.'

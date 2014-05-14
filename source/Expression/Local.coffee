@@ -1,3 +1,4 @@
+{ cCheck } = require '../compile-help/check'
 { mangle } = require '../compile-help/JavaScript-syntax'
 Pos = require '../compile-help/Pos'
 { type } = require '../help/check'
@@ -15,6 +16,8 @@ module.exports = class Local extends Assignable
 	###
 	constructor: (@_pos, @_name) ->
 		type @_pos, Pos, @_name, String
+		cCheck @_name != 'this', @_pos,
+			'Local may not be named `this`. Use `@` instead.'
 
 	# @noDoc
 	name: -> @_name
