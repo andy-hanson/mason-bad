@@ -1,8 +1,8 @@
-use .alias for Fun
+use .types for Fun
 
 |opts
 	super:Fun = opts.super
-	name:Str = opts.name
+	name:String = opts.name
 
 	s = Object.create opts.super.prototype
 	s.toString = |

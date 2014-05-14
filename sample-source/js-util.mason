@@ -1,28 +1,41 @@
-use .alias for Act Fun
+use .types for Act Fun
+
+do. |todo:Act
+	doc
+		Runs `todo` on 0 arguments.
+
+	`todo()`
+
+exists?. |a
+	doc
+		False if `a` is null or undefined.
+
+	`a != null`
 
 identical?. |a b
+	doc
+		If arguments are strings, numbers, or booleans, same as `==`.
+		If arguments are objects, they must take up the same place in memory.
+		If both arguments are `NaN`, this will still evaluate to False.
+
 	`a === b`
 
-new. |constructor:Function
+is-a?. |a type:Fun
+	doc
+		Whether `a` is an instance of `type` (or a sub-type thereof).
+		Works even if `a` is a primitive.
+
+	`Object(a) instanceof type`
+
+new. |constructor:Function \TODO: ...args
+	doc
+		Calls `new` on the constructor with the given arguments.
+
 	boundConstructor = constructor.bind constructor (arguments.slice 1)
 	`new boundConstructor`
 
-send. |object name:String
+send. |object name:String \ TODO: ...args
+	doc
+		Calls `object`'s method `name` with the given arguments.
+
 	(property object name).apply object (arguments.slice 2)
-
-property. |object name:String
-	`object[name]`
-
-\ True unless a is null or undefined.
-exists?. |a
-	`a != null`
-
-is-a?. |a type:Fun
-	`Object(a) instanceof type`
-
-truthy?. |:Bool a
-	`!!a`
-
-do. |todo:Act
-	`todo()`
-

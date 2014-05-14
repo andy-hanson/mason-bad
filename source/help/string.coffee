@@ -6,5 +6,8 @@
 @repeated = (str, times) ->
 	([0 ... times].map -> str).join ''
 
+###
+All but the first character.
+###
 @tail = (str) ->
 	str.slice 1

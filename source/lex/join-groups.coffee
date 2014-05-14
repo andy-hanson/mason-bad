@@ -29,18 +29,20 @@ module.exports = joinGroups = (tokens) ->
 		current.push result
 
 	openKinds =
-		[ '(', '→', '|', '@|' ]
+		[ '(', '[', '→', '|', '@|' ]
 	blockCloseKinds =
 		[ '←' ]
 	closeKinds =
-		[ ')' ].concat blockCloseKinds
+		[ ')', ']' ].concat blockCloseKinds
 
 	for token in tokens
 		if token instanceof GroupPre
 			pos = token.pos()
 			kind = token.kind()
+
 			if kind in openKinds
 				newLevel token
+
 			else if kind in closeKinds
 				cCheck (not isEmpty opens), pos, ->
 					"Unexpected closing #{kind}"

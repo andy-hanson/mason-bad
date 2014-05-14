@@ -1,6 +1,7 @@
+use .types for Fun
 use .class
 use .singleton
-use .js-util for exists?
+use .js-util for do exists?
 
 Option = class
 	name. "Option"
@@ -24,12 +25,21 @@ Option = class
 			name. "None"
 			super. Option
 
-		force. |a:Option message
+		force. |a:Option message \ ?message:String
+			get-or a |
+				\ TODO
+				mess = get-or (Option message) |
+					"Tried to force None."
+				`throw new Error(mess)`
+				()
+
+		get-or. |a:Option default:Fun[-> Any]
 			case a
 				:Some
 					_.value
-				= None
-					`throw new Error((message == null) ? "Tried to force None" : explain)`
-					()
+				else
+					do default
+
+
 
 Option

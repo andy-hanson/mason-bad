@@ -53,9 +53,13 @@ module.exports = class Pos
 	@start: ->
 		new Pos 1, 1
 
+	###
+	Starting position given `prelude`.
+	Corrects for the prelude so that the first non-prelude line will be number 1.
+	(Prelude lines will be < 1, but they are maxxed to 1 by `sourceNodeSafeLine`.)
+	###
 	@startWithPrelude: (prelude) ->
 		type prelude, String
 
 		preludeLines = (prelude.split '\n').length
 		new Pos 1 - preludeLines, 1
-

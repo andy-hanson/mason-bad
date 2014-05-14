@@ -1,6 +1,0 @@
-|dict1:Object dict2:Object
-	doc
-		Puts all of dict1's keys into dict2.
-
-	`for (var key in dict2) dict1[key] = dict2[key]`
-	()

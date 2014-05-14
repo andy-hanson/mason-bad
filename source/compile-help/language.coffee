@@ -18,9 +18,9 @@ Character classes used during tokenization.
 	digit:
 		rgx /[0-9]/
 	number:
-		rgx /[\-0-9_.\/e]/
+		rgx /[\-0-9,.\/e]/
 	groupPre:
-		rgx /[\(\)]/
+		rgx /[\(\)\[\]]/
 	space:
 		rgx ' '
 	precedesName:
@@ -33,13 +33,14 @@ Character classes used during tokenization.
 Every kind a `Group` can have.
 ###
 @groupKinds =
-	[ '(', '→', '"', '|', '@|' ]
+	[ '(', '[', '→', '"', '|', '@|' ]
 
 ###
 Maps group openers to closers.
 ###
 @groupMatch =
 	'(': ')'
+	'[': ']'
 	'→': '←'
 
 @nameKinds =

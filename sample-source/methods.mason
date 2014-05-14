@@ -1,8 +1,8 @@
-use .alias for Fun
+use .types for Fun
 use .js-util for exists?
 use .mangle
 
-make-dispatcher = |name:Str
+make-dispatcher = |name:String
 	mangled = mangle name
 
 	make-it-code = "
@@ -18,7 +18,7 @@ make-dispatcher = |name:Str
 	(Fun make-it-code) ()
 
 method. |opts
-	name:Str = opts.name
+	name:String = opts.name
 
 	theMethod = make-dispatcher name
 
@@ -33,5 +33,5 @@ method. |opts
 	theMethod
 
 implement. |method:Fun type:Fun implementation:Fun
-	name:Str = method.method-name
+	name:String = method.method-name
 	`type.prototype[name]` = implementation

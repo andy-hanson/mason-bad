@@ -13,7 +13,7 @@ module.exports = lexNumber = (str, pos) ->
 
 	plainLex = (subStr) ->
 		numStr =
-			subStr.replace '_', ''
+			subStr.replace ',', ''
 		num =
 			Number numStr
 		cCheck (not Number.isNaN num), pos,

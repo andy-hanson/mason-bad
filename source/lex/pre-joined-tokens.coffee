@@ -127,29 +127,11 @@ module.exports = preJoinedTokens = (stream, inQuoteInterpolation = no) ->
 						stream.takeUpTo /\n/
 					[ ]
 
-				when ch == '['
-					pos = stream.pos()
-					stream.readChar()
-					n = 1
-					while yes
-						done =
-							switch stream.readChar()
-								when '['
-									n += 1
-									no
-								when ']'
-									n -= 1
-									n == 0
-								when '\n', undefined
-									cFail pos, 'Unclosed `[`'
-								else
-									no
-						if done
-							break
-					[ ]
-
 				when ch == '\n'
-					cCheck stream.prev() != ' ', pos, 'Line ends in a space.'
+					cCheck stream.prev() != ' ', pos,
+						'Line ends in a space.'
+					cCheck (not inQuoteInterpolation), pos,
+						'Quote interpolation can not be multiple lines.'
 
 					# Skip blank lines.
 					stream.takeWhile /\n/

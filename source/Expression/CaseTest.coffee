@@ -1,8 +1,10 @@
+{ mangle } = require '../compile-help/JavaScript-syntax'
 Pos = require '../compile-help/Pos'
 { type, typeEach } = require '../help/check'
 { interleave } = require '../help/list'
 Expression = require './Expression'
-typeTest = require './typeTest'
+Local = require './Local'
+Type = require './Type'
 
 ###
 A test for use in a Case expression.
@@ -84,18 +86,27 @@ Test for being an instance of a type.
 ###
 class TypeTest extends CaseTest
 	# @noDoc
-	constructor: (@_pos, @_type) ->
-		type @_pos, Pos, @_type, String
+	constructor: (@_type) ->
+		type @_type, Type
+
+	# @noDoc
+	pos: -> @_type.pos()
 
 	# @noDoc
 	compile: (context) ->
-		typeTest '_', @_type
+		cased = new Local @pos(), '_'
+		@_type.toTest context, cased
 
+###
+Disjunction of many CaseTests.
+E.g. `= 3, < _ 2, :String`
+###
 class OrTest extends CaseTest
 	# @noDoc
 	constructor: (@_pos, @_parts) ->
 		type @_pos, Pos
 		typeEach @_parts, CaseTest
 
+	# @noDoc
 	compile: (context) ->
 		interleave (@_parts.map (part) -> part.compile context), ' || '

@@ -1,6 +1,7 @@
 use arithmetic for +
 use graceful-fs~fs
 
+()[]{}
 
 ""
 "\"" was a string
@@ -9,8 +10,6 @@ use graceful-fs~fs
 	It's still {1 + 1}...
 	\{not an interpolation}
 
-
-\ comment
 \\\
 comment
 \\\

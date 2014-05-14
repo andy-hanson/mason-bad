@@ -2,8 +2,27 @@ use source-map-support
 source-map-support.install null
 log! = console.log
 
+use .Bool for True
+use .methods for method implement
+use .type-methods for type-test type-check
+
+Poop =
+	subsumes?. |a
+		True
+	!subsumes. |a
+		log! "Inside check!"
+
+a:Poop = 3
+
+case a
+	:Poop
+		log! "Yay!"
+	else
+		log! "Huh?"
+
 use .Option
 log! (Option 3)
+\log! (Option.force (Option null))
 
 \\\
 use .Option for Some None force

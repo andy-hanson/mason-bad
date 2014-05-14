@@ -6,6 +6,7 @@ Block = require './Block'
 BlockWrap = require './BlockWrap'
 Expression = require './Expression'
 TypedVariable = require './TypedVariable'
+Type = require './Type'
 
 ###
 A function. All functions in Mason are anonymous.
@@ -20,7 +21,7 @@ module.exports = class Fun extends Expression
 	###
 	constructor: (@_pos, @_returnType, @_arguments, @_block, @_preserveThis) ->
 		type @_pos, Pos
-		typeExist @_returnType, String
+		typeExist @_returnType, Type
 		typeEach @_arguments, TypedVariable
 		type @_block, Block, @_preserveThis, Boolean
 

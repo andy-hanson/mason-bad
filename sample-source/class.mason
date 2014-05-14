@@ -1,7 +1,7 @@
-use .alias for Fun
-use .Bool for True False
-use .extend!
-use .js-util for do exists? truthy?
+use .types for Bool Fun
+use .Bool for True False truthy?
+use .dict \ for get-property set-property!
+use .js-util for do exists?
 use .mangle
 
 make-inspect = |name
@@ -51,13 +51,11 @@ make-constructor = |name members mutable short?
 			}
 		}
 
-	console.log body
-
 	(Function body) ()
 
 
 |opts
-	name:Str = opts.name
+	name:String = opts.name
 	super = `(opts.super == null) ? Object : opts.super`
 	members = opts.members
 	instance = opts.instance
@@ -66,10 +64,11 @@ make-constructor = |name members mutable short?
 	ctr = null
 	proto = Object.create super.prototype
 	construct = opts.construct
-	is-concrete = exists? construct
 
-	case is-concrete
-		_
+	case construct
+		exists? _
+			\ If it has a constructor, it is a concrete class.
+
 			member-keys:Array[String] = Object.keys opts.members
 			mutable:Bool = truthy? opts.mutable
 
@@ -94,16 +93,19 @@ make-constructor = |name members mutable short?
 
 
 			member-keys.forEach |member
-				`ctr["get-"+member]` = |instance
-					`instance[member]`
+				dict.set! ctr "get-{member}" |instance
+					dict.get instance member
+
 				case mutable
 					_
-						`ctr["set-"+member+"!"]` = |instance value
-							`instance[member]` = value
+						dict.set! ctr "set-{member}!" |instance value
+							dict.set! instance member value
 					else
 						()
 
 		else
+			\ If it has no constructor, it is not a concrete class.
+
 			factory = opts.factory
 			ctr := case factory
 				exists? _
@@ -123,9 +125,9 @@ make-constructor = |name members mutable short?
 
 
 	case static
-		:Fun[Fun -> Dict]
+		:Fun \ TODO: [Type -> Dict]
 			statics = static ctr
-			extend! ctr statics
+			dict.extend! ctr statics
 		\ TODO: not exists
 		else
 			()

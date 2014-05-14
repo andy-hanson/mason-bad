@@ -5,11 +5,9 @@ Options = require './Options'
 prelude = ''
 
 str = '''
-case a
-	_
-		x = 3
-	else
-		y
+case x
+	:A[B]
+		3
 '''
 
 command =

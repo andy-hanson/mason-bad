@@ -2,7 +2,7 @@
 Recommended default prelude for mason projects.
 \\\
 
-use .alias for Act Bool Dict Fun Int Nat Real Str
+use .alias for Act Bool Dict Fun Int Nat Real
 
 use .arithmetic for + - neg * / remainder ^ log-e log
 use .arithmetic for square square-root
@@ -10,21 +10,19 @@ use .arithmetic for abs increment decrement
 use .arithmetic for round-towards-zero round round-down round-up
 use .arithmetic for divisible? positive? negative?
 
-use .Bool for True False not and or nand nor xor
+use .Bool for True False not and or nand nor truthy? xor
 
 use .class
-
-\ use .collection for ???
 
 use .comparisons for compare == < > <= >=
 
 use .control for if unless while until do-while do-until returning
 
+use .dict
+
 use .error for annotate-errors catch-opt catch throw! try try-catch try-catch-finally
 
-use .extend!
-
-use .js-util for identical? new send property exists? is-a? truthy? do
+use .js-util for identical? new send exists? is-a? do
 
 use .methods for method implement
 

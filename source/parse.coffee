@@ -189,6 +189,9 @@ class Parser
 		else
 			new E.CasePart (@caseTest testTokens), block
 
+	###
+	Parse the test of a CasePart.
+	###
 	caseTest: (tokens) ->
 		typeEach tokens, T.Token
 
@@ -199,12 +202,14 @@ class Parser
 
 				if (T.keyword '=') t0
 					E.CaseTest.Equal t0.pos(), @expression (tail testTokens)
-				else if (T.name ':x') t0
-					cCheck testTokens.length == 1, t0.pos(),
-						"Did not expect anything after #{t0}"
-					E.CaseTest.Type t0.pos(), t0.text()
 				else
-					E.CaseTest.Boolean @_pos, @expression testTokens
+					[ theType, rest ] = @tryTakeType tokens
+					if theType?
+						cCheck (isEmpty rest), theType.pos(),
+							"Did not expect anything after type."
+						E.CaseTest.Type theType
+					else
+						E.CaseTest.Boolean @_pos, @expression testTokens
 
 		if parts.length == 1
 			parts[0]
@@ -247,10 +252,15 @@ class Parser
 		parts = [ ]
 
 		tokens.forEach (token) =>
+			isDotName = (T.name '.x') token
+			isSub = (T.group '[') token
 			x =
-				if (T.name '.x') token
+				if isDotName or isSub
 					if (popped = parts.pop())?
-						new E.Member token.pos(), popped, token.text()
+						if isDotName
+							new E.Member token.pos(), popped, token.text()
+						else
+							E.sub token.pos(), popped, @expressionParts token.body()
 					else
 						@unexpected token
 				else
@@ -269,17 +279,10 @@ class Parser
 			@takeIndentedFromEnd tokens
 		parsedBlock =
 			@block block
-
-		returnType =
-			if ((T.name ':x') argTokens[0])
-				rt = argTokens[0]
-				argTokens = tail argTokens
-				rt.text()
-			else
-				null
-
+		[ returnType, tokensAfterReturnType ] =
+			@tryTakeType argTokens
 		args =
-			@typedVariables argTokens
+			@typedVariables tokensAfterReturnType
 
 		new E.Fun @_pos, returnType, args, parsedBlock, preserveThis
 
@@ -416,6 +419,36 @@ class Parser
 
 			[ before, block.body() ]
 
+	###
+	@return [ Expression?, Array<Token> ]
+	###
+	tryTakeType: (tokens) ->
+		t0 =
+			tokens[0]
+
+		if (T.name ':x') t0
+			local =
+				new E.Local t0.pos(), t0.text()
+			t1 =
+				tokens[1]
+
+			if (T.group '[') t1
+				@_pos =
+					t1.pos()
+				subbed =
+					@expressionParts t1.body()
+				sub =
+					E.sub @_pos, local, subbed
+				tipe =
+					new E.Type sub
+				[ tipe, tokens.slice 2 ]
+			else
+				tipe =
+					new E.Type local
+				[ tipe, tail tokens ]
+
+		else
+			[ null, tokens ]
 
 	###
 	@return [Array<TypedVariable>]
@@ -423,28 +456,25 @@ class Parser
 	typedVariables: (tokens) ->
 		out = []
 
-		idx = 0
-		while idx < tokens.length
+		until isEmpty tokens
 			local =
-				@local tokens[idx]
-			idx += 1
+				@local tokens[0]
+			tokens = tail tokens
 
 			dots = []
-			while (T.name '.x') tokens[idx]
-				dots.push tokens[idx]
-				idx += 1
-
-			varType =
-				if (T.name ':x') tokens[idx]
-					idx +=1
-					tokens[idx - 1].text()
-				else
-					null
+			while (T.name '.x') tokens[0]
+				dots.push tokens[0]
+				tokens = tail tokens
 
 			_var = local
-			until isEmpty dots
-				_var = new E.Member dots[0].pos(), _var, dots[0].text()
-				dots = tail dots
+			dots.forEach (dot) ->
+				_var = new E.Member dot.pos(), _var, dot.text()
+			#until isEmpty dots
+			#	_var = new E.Member dots[0].pos(), _var, dots[0].text()
+			#	dots = tail dots
+
+			[ varType, tokens ] =
+				@tryTakeType tokens
 
 			out.push new E.TypedVariable _var, varType
 

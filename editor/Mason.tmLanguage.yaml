@@ -3,20 +3,29 @@ name: Mason
 scopeName: source.mason
 fileTypes:
 - mason
-uuid: 857c9cc3-2862-4a05-87e7-c7f90f51f1a7
-
-# I keep using this pattern:
-# [^\.\s\(\)\[\]\"\\]*
-# For names. Don't change it just once, change it everywhere!
+uuid: 857c9cc3-2862-4a05-87e7-115318008707
 
 patterns:
 
+- comment: Bracket
+  name: skeyword
+  match: "[\\(\\[\\{\\}\\]\\)]"
 
-# Empty string
-- name: string
+- comment: Block comment
+  name: comment
+  begin: \\\\\\
+  end: \\\\\\
+
+- comment: Single-line comment
+  name: comment
+  match: \s*\\.*
+
+- comment: Empty string
+  name: string
   match: \"\"
-# Multi-line string
-- name: string
+
+- comment: Multi-line string
+  name: string
   begin: \"\n
   end: ^$ # on blank line
   patterns:
@@ -26,8 +35,10 @@ patterns:
   - name: variable
     comment: Interpolation
     match: \{[^\}]*\}
-# Single-line string
-- name: string
+
+
+- comment: Single-line string
+  name: string
   begin: \"
   end: \"
   patterns:
@@ -38,13 +49,13 @@ patterns:
     comment: Interpolation
     match: \{[^\}]*\}
 
-- name: support.other
-  comment: JavaScript literal
+- comment: JavaScript literal
+  name: support.other
   match: "`[^`]*`"
 
 
-- name: entity.other
-  comment: Docstring
+- comment: Docstring
+  name: entity.other
   begin: ^\s*(doc)$
   beginCaptures:
     '1':
@@ -56,32 +67,20 @@ patterns:
 
 - name: keyword
   match: \b(use|for|case|else|in|out|res|_)\b
-- name: keyword
-  comment: \@ on its own or before a property
+- comment: \@ on its own or before a property
+  name: keyword
   match: \@
 
-
-- name: comment
-  comment: Block comment
-  begin: \\\\\\
-  end: \\\\\\
-
-
-- name: comment
-  comment: Single-line comment
-  match: \\.*
-
-
-- name: constant.numeric
+- comment: Number literal
+  name: constant.numeric
   match: \d+(\.\d+)?
 
-- name: support.type
-  commment: Type appearing on its own in a case statement.
+- commment: Type appearing on its own in a case statement.
+  name: support.type
   match: :\S+
 
-
-- name: variable
-  comment: Local assignment
+- comment: Local assignment
+  name: variable
   match: (([^\s:~]+)(:([^\s~]+))?(~([^\s]+))?\s)+(=)
   captures:
     '3':
@@ -101,10 +100,11 @@ patterns:
       name: comment
 
 
-- name: storage
-  comment: Object assignment
+- comment: Dict assignment
+  name: storage
   # Match and captures closely mirror those in local assignment.
   match: ([^\.]*)(\.\s)
+  # This is better but *very* slow:
   #(\s?[^\s:~.]+(:([^\s~.]+))?(~([^\s.]+))?)+(\.)\s
   captures:
     '2':
@@ -127,7 +127,8 @@ patterns:
     #  name: comment
 
 
-- name: variable.parameter
+- comment: Function
+  name: variable.parameter
   begin: (\|)
   beginCaptures:
     '1':
@@ -141,8 +142,3 @@ patterns:
           name: comment
     - name: comment
       match: \\.*
-
-
-
-- name: keyword
-  match: "[\\(\\[\\{\\}\\]\\)]"

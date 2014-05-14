@@ -4,25 +4,53 @@ Pos = require '../compile-help/Pos'
 { interleave, last, rightUnCons  } = require '../help/list'
 Expression = require './Expression'
 
+###
+The content of a block responsible for creating `res`.
+Does not include type checks or conditions.
+###
 module.exports = class BlockBody extends Expression
 	# @noDoc
 	compile: ->
 		throw new Error "Should not be called!"
 
+	###
+	@return
+	  lines: Array[Chunk]
+	  madeRes: Boolean
+	    Whether `res` was written to.
+	###
 	makeRes: (context) ->
 		abstract()
 
+	###
+	@param pos [Pos]
+	@param lines [Array<Expression>]
+	@return [ListBody]
+	###
 	@List: (pos, lines) ->
 		new ListBody pos, lines
 
+	###
+	@param pos [Pos]
+	@param lines [Array<Expression>]
+	@param keys [Array<String>]
+	  Non-empty list of dict keys.
+	  (There should be a local assignment in `lines` corresponding to each.)
+	@return [DictBody]
+	###
 	@Dict: (pos, lines, keys) ->
 		new DictBody pos, lines, keys
 
+	###
+	@param pos [Pos]
+	@param lines [Array<Expression>]
+	@return [PlainBody]
+	###
 	@Plain: (pos, lines) ->
 		new PlainBody pos, lines
 
 ###
-Block that returns a list.
+Returns a list.
 ###
 class ListBody extends BlockBody
 	# @noDoc
@@ -60,7 +88,7 @@ genObjectLiteral = (keys, indent) ->
 	[ '{', nl, '\t', parts, nl, '}' ]
 
 ###
-Block that returns a dict.
+Returns a dict.
 ###
 class DictBody extends BlockBody
 	# @noDoc
@@ -70,7 +98,7 @@ class DictBody extends BlockBody
 		typeEach @_keys, String
 
 	# @noDoc
-	makeRes: (context, lineNodes) ->
+	makeRes: (context) ->
 		lines =
 			@_lines.map (line) ->
 				line.toNode context
@@ -80,8 +108,7 @@ class DictBody extends BlockBody
 		madeRes: yes
 
 ###
-Block that returns the last line if it is a pure expression,
-else returns nothing.
+Returns the last line if it is a pure expression, else returns `undefined`.
 ###
 class PlainBody extends BlockBody
 	# @noDoc

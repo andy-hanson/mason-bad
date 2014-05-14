@@ -1,4 +1,4 @@
-use .extend!
+use .types for Bool
 
 True.
 	`true`
@@ -20,6 +20,12 @@ nand. |a:Bool b:Act
 
 nor. |a:Bool b:Act
 	not (or a b)
+
+truthy?. |:Bool a
+	doc
+		Whether JavaScript will consider `a` truthy.
+
+	`!!a`
 
 xor. |a:Bool b:Bool
 	`a !== b`

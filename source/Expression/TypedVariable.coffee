@@ -3,7 +3,7 @@ Pos = require '../compile-help/Pos'
 { check, type, typeExist } = require '../help/check'
 Assignable = require './Assignable'
 Expression = require './Expression'
-typeTest = require './typeTest'
+Type = require './Type'
 
 ###
 A variable and maybe a type.
@@ -11,11 +11,11 @@ A variable and maybe a type.
 module.exports = class TypedVariable extends Expression
 	###
 	@param _var [Assignable]
-	@param _type [String?]
+	@param _type [Expression?]
 	###
 	constructor: (@_var, @_type) ->
 		type @_var, Assignable
-		typeExist @_type, String
+		typeExist @_type, Type
 
 	# @noDoc
 	pos: -> @var().pos()
@@ -38,20 +38,4 @@ module.exports = class TypedVariable extends Expression
 	###
 	typeCheck: (context) ->
 		check @hasType()
-
-		if @_type?
-			name =
-				@var().name()
-			test =
-				typeTest name, @_type
-			err =
-				[	'throw new Error("`',
-					name, '` is no ', @_type,
-					', it\'s " + ', (mangle name), ')' ]
-			checkCode =
-				[ 'if (!(', test, '))\n', context.indent(), '\t', err ]
-
-			@nodeWrap checkCode, context
-
-		else
-			''
+		@_type.toCheck context, @_var, @_var.name()

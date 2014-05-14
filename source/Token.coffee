@@ -54,6 +54,9 @@ class StringLiteral extends Literal
 	constructor: (@_pos, @_value) ->
 		type @_pos, Pos, @_value, String
 
+	###
+	The string represented.
+	###
 	value: -> @_value
 
 	# @noDoc

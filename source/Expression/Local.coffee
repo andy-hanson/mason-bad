@@ -30,5 +30,8 @@ module.exports = class Local extends Assignable
 		else
 			[ 'var ', mangle @name() ]
 
+	###
+	Local for the result of blocks.
+	###
 	@res: (pos) ->
 		new Local pos, 'res'

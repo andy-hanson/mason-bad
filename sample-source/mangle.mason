@@ -65,7 +65,7 @@ javaScriptKeywords := javaScriptKeywords.split "\n"
 
 illegalJavaScriptNameChar = `/[^a-zA-Z0-9_]/g`
 
-|name:Str
+|name:String
 	case name
 		`javaScriptKeywords.indexOf(_) !== -1`
 			"_{name}"

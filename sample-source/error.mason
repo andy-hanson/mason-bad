@@ -1,5 +1,5 @@
 use .alias for Fun Act
-use .Option for Some None force
+use .Option
 use .Bool for True False
 
 annotate-errors. |try:Act make-annotation:Fun[Error]
@@ -16,7 +16,7 @@ catch-opt. |try:Act
 		Some error
 
 catch |try:Fun
-	force (catch-opt try) "Expected to throw an error."
+	Option.force (catch-opt try) "Expected to throw an error."
 
 throw!. |error
 	case error
@@ -38,8 +38,9 @@ try-catch. |try:Act catch:Fun[Error]
 	try-catch-finally try catch |
 		()
 
-try-catch-finally |try:Act catch:Fun[Error -> Any] finally:Act
-	`var res;`
-	`try { res = _try(); }`
-	`catch (error) { res = _catch(error); }`
+try-catch-finally. |try:Act catch:Fun[Error -> Any] finally:Act
+	`var x;`
+	`try { x = _try(); }`
+	`catch (error) { x = _catch(error); }`
 	`finally { _finally(); }`
+	x

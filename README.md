@@ -19,116 +19,55 @@ Someday there will be an easy way to get started.
 
 
 
-Editing Code
----
-
-There is a Sublime Text syntax definition available.
-Just run `editor/install-sublime-language.py`.
-This will write to `~/.config/sublime-text-3/Packages/User`.
-
-
 Dicts
 ---
 The core of mason is the dict definition.
 
 	my-dict.
 		one. 1
-		two. 2
+		two. + one one
 
 This defines a new dictionary `my-dict` and assigns values to it.
 So `my-dict.one` will be `1` and `my-dict.two` will be `2`.
-Assignments are done within an indented block of code.
+Each `key. value` assignment is done within an indented block of code.
+*Be sure to leave a space after the `.`*, or you are accessing a property!
 
-Dict keys can also reference each other.
+Dict keys are also local variables and can reference each other.
+If a key has no written value, it will be `True` by default.
 
-	my-dict.
-		one. 1
-		two. + one one
-
-Be sure to leave a space after the `.`!
-Otherwise `two.+ one one` would be calling the method `+` on a nonexistent object `two`!
-
-
-
-Comments
----
-
-	\ Single-line comment
-
-	\\\
-	Multi
-	line
-	comment
-	\\\
-
-
-
-Names
----
-
-Any string of non-special characters is a name.
-Special characters are:
-
-* Whitespace
-* Brackets: `( ) [ ] { }`
-* In use: ``" ` \ | @ : . ~ ,``
-* Reserved: `# $ ; '`
-
-Also, names can't be numbers, meaning they can't start with a digit or a minus sign followed by a digit.
+	this-is-true.
 
 
 
 Lists
 ---
 
-Everyone loves lists!
+Lists are also written in indented blocks.
+Each line beginning with `. ` (remember the spaec!) writes a new entry to the list.
+List entries can theirselves be blocks.
 
 	my-list.
 		. 1
-		. 2
-		. 3
-
-Yes, list entries can be the results of blocks.
-
-	my-complex-list.
+		two = 2
+		. two
 		.
 			x. 1
 			y. 2
-		.
-			. 3
-			. 4
-		.
-			x = 5
-			x
 
 
 
 Locals
 ---
 
-Dict assignments (using `. `) make local variables.
-If you want to make a local variable but not assign it to a dict, use `=`.
+To create a local that's not a dict assignment, use `=`.
 
+	two.
+		one = 1
+		+ one one
 
-	my-dict.
-		one. 1
-		two = 2
-
-`my-dict.one` will still be `1` but `my-dict.two` will be undefined.
-
+`one` can not be accessed outside of the indented block.
 
 If a block isn't a dict or list, its value is that of its last line.
-
-	my-number.
-		local = 1
-		+ local local
-
-In this case, `my-number` will be `2`.
-`local` is local to the indented block started by `my-number.`
-
-If you don't provide a value, it will be `null` by default.
-
-	this-is-null.
 
 
 
@@ -204,18 +143,20 @@ You can specify return types by putting the type right after the `|`.
 
 	decrement 1 \ Fails!
 
-The compiler handles these types specially using `typeof`:
+Our first example might be written as:
 
-* Bool: Matches booleans.
-* Nat, Int, Real: Match numbers. Currently, Nat and Int will match any Real.
-* Str: Mathes strings.
+	one. 1
+	Int.!subsumes 1
 
-All other types are handled using `instanceof`.
+The method `!subsumes` defaults to calling the predicate method `subsumes?` and throwing an error if it fails. You can write your own custom type with just `subsumes?`, or make a fancy `!subsumes` that gives you a better error message as well.
 
-You can also describe your types in more detail using `[]`. Everything in the brackets is ignored.
 
-	passes-all-tests. |x:Int tests:Array[Fun[Int -> Bool]]
-		...
+
+Subscripts
+---
+
+Many types rely on subscripting. `a[b]` is short-hand for `a.sub b`.
+`x:Array[Int] = y` would generate a check like `(Array.sub Int).!subsumes x`.
 
 
 
@@ -224,7 +165,7 @@ Conditions
 
 You can add code at the beginning and end of functions to check that everything is OK.
 
-	half. |:Int a:Int
+	half. |a
 		in
 			assert (divisible? a 2)
 		out
@@ -247,101 +188,57 @@ With `case` you can neatly deal with all the potential values of a variable.
 
 	count-string. |a
 		case a
-			= 0
-				"none"
-			< _ 2
-				"some"
+			= 7
+				"Lucky number seven."
+			:Number
+				"Exactly {_}."
+			not (truthy? _)
+				"Bupkis!"
+			:String, :Array, has-property? _ "length"
+				count-string _.length
 			else
 				"lots"
 
 To test equality, use `=`.
 
-To do any other test, just write your expression on the line. `_` stands for the value you `case` on.
+To test for inclusion in a type, write the type name preceded by `:`. (This calls `subsumes?`, not `!subsumes`.)
 
-Use `else` for a fallback. If you don't provide it and none of the tests match, an error will be thrown.
-
-You can also `case` on types:
-
-	what-is-it. |a
-		case a
-			:String
-				"It's a string"
-			:Number
-				"It's not 42"
-			else
-				"Who cares?"
+To do any other test, just write your expression on the line. `_` is the value you `case` on.
 
 If you want to handle many cases the same way, use `,`:
 
-	length. |a
-		case a
-			:String, :Array, has-property? _ "length"
-				a.length
-			:Number
-				abs a
+If you don't provide an `else` case and no test matches, it throws an error.
+
+
+
+Multiple assignment
+---
+
+If you write `a b = dict`, `a` will be `dict.a` and `b` will be `dict.b`.
+You can rename these: in `a~eh b~bee = dict`, `eh` will be `dict.a` and `bee` will be `dict.b`.
 
 
 
 Use
 ---
 
-Here's a sample directory structure:
+There is an easier syntax for using `require`.
 
-	node_modules/
-		burger/
-			...
-	source/
-		court-house.js
-		detectives/
-			drake.coffee
-			you-are-here.mason
-		secretaries/
-			della.mason
-
-Say you're writing `you-are-here.mason`.
-
-To use a built-in module or one in `node_modules`:
-
-	use fs
-	use burger
-
-This is the equivalent of:
-
-	fs = require "fs"
-	burger = require "burger"
-
-To use a module from the same directory:
-
-	use .drake
-	\ drake = require "./drake"
-
-To use a module in a directory above:
-
-	use ..court-house
-	\ court-house = require "../court-house"
-
-Finally:
-
-	use ..secretaries.della
-	\ della = require "../secretaries/della"
-
-You can also rename modules:
-
-	use .drake as mop
-	\ mop = require './drake'
-
-But usually you'll want to immediately get the module's properties anyway. Remember multiple assignment?
-
-	use ..secretaries.della for dictating investigating
-	\ dictating investigating = require "../secretaries/della"
-
+Use | Require
+:-- | :--
+`use fs` | `fs = require "fs"`
+`use .drake` | `drake = require "./drake"`
+`use ..court-house` | `court-house = require "../court-house"`
+`use ..secretaries.della` | `della = require ../secretaries/della`
+`use graceful-fs~fs` | `fs = require "graceful-fs"`
+`use fs for read write` | `read write = fs`
 
 
 Make Modules
 ---
 
 The value of a module is the result of running the code.
-You shouldn't write to `module.exports` explicitly.
+Don't write to `module.exports` explicitly.
 
 
 
@@ -350,32 +247,13 @@ You shouldn't write to `module.exports` explicitly.
 
 `@` means `this`, and `@property` means `this.property`.
 
-Normally `this` is not preserved when entering an inner function. E.g.:
-
-	\ Prints 'undefined' three times.
-	@prop = 3
-	times @prop |
-		log! @prop
-
+Normally `this` is lost when entering an inner function.
 You can preserve `this` by using `@|`.
 
-	\ Prints '3' three times.
+	\ Prints '3'.
 	@prop = 3
-	times @prop @|
+	do @|
 		log! @prop
-
-
-
-JavaScript
----
-
-Sometimes you just gotta shove some JavaScript in there.
-
-	i = 2
-	\ Prints 'true'. Post-increment and weakly typed equality. Joy!
-	log! `i++ == "2"`
-
-You could also set up your build system to compile both Mason and JavaScript (or CoffeeScript) files together.
 
 
 
@@ -393,7 +271,7 @@ Multiline quotes can be written in an indented block:
 		that {+ 1 1} is two.
 		You can use "quote symbols" in block quotes.
 
-You can use `\` for certain special characters:
+`\` escapes certain special characters:
 
 Escape | Output
 :-: | :-:
@@ -407,12 +285,52 @@ Escape | Output
 Numbers
 ---
 
-You can do some funky stuff with number literals.
+You can do some funky (and *experimental*) stuff with number literals.
 
-	1
-	1_234_567 \ Underscores are ignored
-	1/2 \ Fractions
-	1e6 \ Scientific notation
+	lots. 123,456 \ Commas are ignored
+	pi. 22/7 \ Fractions
+	us-debt. 18e12 \ Scientific notation
+
+
+
+Names
+---
+
+Names can contain any non-special characters is a name.
+Special characters are:
+
+* Whitespace
+* Brackets: `( ) [ ] { }`
+* In use: ``" ` \ | @ : . ~ ,``
+* Reserved: `# $ ; '`
+
+Also, names can't be numbers or keywords.
+
+
+
+Comments
+---
+
+	\ Single-line comment
+
+	\\\
+	Multi-line
+	comment
+	\\\
+
+	doc
+		Docstring. This should go at the start of a function.
+
+
+
+JavaScript
+---
+
+Sometimes you just gotta shove some JavaScript in there.
+
+	i = 2
+	\ Prints 'true'. Post-increment and weak equality. Joy!
+	log! `i++ == "2"`
 
 
 
@@ -424,6 +342,14 @@ If you want more functionality, use modules.
 
 A small standard library is in development.
 
+
+
+Editing Code
+---
+
+There is a Sublime Text syntax definition available.
+Just run `editor/install-sublime-language.py`.
+This will write to `~/.config/sublime-text-3/Packages/User`.
 
 
 Building It Yourself
