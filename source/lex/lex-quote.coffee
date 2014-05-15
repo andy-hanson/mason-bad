@@ -50,10 +50,10 @@ module.exports = lexQuote = (stream, oldIndent, quoteType) ->
 						read
 
 				unless text == ''
-					out.push new T.StringLiteral stream.pos(), text
+					out.push new T.Literal stream.pos(), 'string', text
 
-				if indented and out[0] instanceof T.StringLiteral
-					out[0] = new T.StringLiteral out[0].pos(), out[0].value().trimLeft()
+				if indented and out[0] instanceof T.Literal
+					out[0] = new T.Literal out[0].pos(), 'string', out[0].value().trimLeft()
 
 				new T.Group startPos, '"', out
 			else
@@ -78,7 +78,7 @@ module.exports = lexQuote = (stream, oldIndent, quoteType) ->
 
 		else if ch == '{'
 			unless read == ''
-				out.push new T.StringLiteral stream.pos(), read
+				out.push new T.Literal stream.pos(), 'string', read
 			read = ''
 			startPos =
 				stream.pos()

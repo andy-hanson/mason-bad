@@ -1,5 +1,4 @@
-use .types for Fun
-use .js-util for exists?
+use .types for Any Fun Void ?
 use .mangle
 
 make-dispatcher = |name:String
@@ -11,21 +10,46 @@ make-dispatcher = |name:String
 			var implementation =
 				arguments[0]['{name}'];
 			if (implementation == null)
-				throw new Error("Method `{name}` not defined for " + arguments[0])
+				throw new Error("Method `{name}` not implemented for " + arguments[0])
 			implementation.apply(null, arguments);
 		}
 
 	(Fun make-it-code) ()
 
+make-checked-dispatcher = |name:String checker:Fun
+	mangled = mangle name
+
+	make-it-code = "
+		console.log(checker);
+		return function {mangled}()
+		\{
+			var implementation =
+				arguments[0]['{name}'];
+			if (implementation == null)
+				throw new Error("Method `{name}` not implemented for " + arguments[0]);
+			function impl()
+			\{
+				return implementation.apply(null, arguments);
+			}
+			return checker.apply(null, [impl].concat(arguments));
+		}
+
+	(Fun "checker" make-it-code) checker
+
 method. |opts
 	name:String = opts.name
 
-	theMethod = make-dispatcher name
+	theMethod =
+		case opts.check
+			:Fun
+				make-checked-dispatcher name opts.check
+			:Void
+				make-dispatcher name
 
 	theMethod.method-name = name
 
 	case opts.default
-		exists? _
+		:Any
 			implement theMethod Object _
 		else
 			()

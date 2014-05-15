@@ -2,7 +2,7 @@
 Pos = require '../compile-help/Pos'
 { char, keywords } = require '../compile-help/language'
 { type } = require '../help/check'
-{ dropWhile, isEmpty, last, repeat } = require '../help/list'
+{ dropWhile, isEmpty, last, repeat, rightTail } = require '../help/list'
 T = require '../Token'
 GroupPre = require './GroupPre'
 lexQuote = require './lex-quote'
@@ -71,15 +71,22 @@ module.exports = preJoinedTokens = (stream, inQuoteInterpolation = no) ->
 				when (match char.digit) or (ch == '-' and char.digit.xtest stream.peek 1)
 					numString =
 						stream.takeWhile char.number
+					if (last numString) == '.'
+						numString = rightTail numString
+						stream.stepBack()
 					num =
 						lexNumber numString, pos
 
-					new T.NumberLiteral pos, num
+					new T.Literal pos, 'number', num
 
 				when maybeTake char.groupPre
 					new GroupPre stream.pos(), ch
 
 				when maybeTake /,/
+					cCheck (/\s/.test stream.peek()), pos,
+						'Comma must be followed by space.'
+					stream.skip() #Skip through the space.
+
 					new T.Keyword pos, ','
 
 				when ch == '.'
@@ -174,7 +181,7 @@ module.exports = preJoinedTokens = (stream, inQuoteInterpolation = no) ->
 					text = stream.takeUpTo /[`\n]/
 					switch stream.readChar()
 						when '`'
-							new T.JSLiteral pos, text
+							new T.Literal pos, 'javascript', text
 						else
 							cFail pos, "Unclosed Javascript literal"
 
@@ -186,7 +193,7 @@ module.exports = preJoinedTokens = (stream, inQuoteInterpolation = no) ->
 		else
 			out.push token
 
-	removePrecedingNewLine()
+	#removePrecedingNewLine()
 
 	out
 

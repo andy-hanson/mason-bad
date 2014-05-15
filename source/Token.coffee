@@ -1,4 +1,3 @@
-{ toStringLiteral } = require './compile-help/JavaScript-syntax'
 { groupKinds, nameKinds, keywords } = require './compile-help/language'
 { abstract, check, type, typeEach } = require './help/check'
 { last } = require './help/list'
@@ -31,68 +30,16 @@ class Token
 A Token which represents plain data.
 ###
 class Literal extends Token
-	###
-	JavaScript representation of this Literal.
-	@abstract
-	###
-	toJS: ->
-		abstract()
-
-	# @noDoc
-	show: ->
-		@toJS()
-
-###
-A string with no interpolation.
-A part of quote `Group`s.
-###
-class StringLiteral extends Literal
-	###
-	@param _pos [Pos]
-	@param _value [String]
-	###
-	constructor: (@_pos, @_value) ->
+	constructor: (@_pos, @_kind, @_value) ->
 		type @_pos, Pos, @_value, String
+		check @_kind in [ 'number', 'string', 'javascript' ]
 
-	###
-	The string represented.
-	###
+	kind: -> @_kind
 	value: -> @_value
 
 	# @noDoc
-	toJS: ->
-		toStringLiteral @_value
-
-###
-A floating-point number.
-###
-class NumberLiteral extends Literal
-	###
-	@param _pos [Pos]
-	@param _value [String]
-	###
-	constructor: (@_pos, @_value) ->
-		type @_pos, Pos, @_value, Number
-
-	# @noDoc
-	toJS: ->
-		# Encase in parentheses to avoid a `1.sin` sort of error.
-		"(#{@_value})"
-
-###
-Javascript code passed through directly.
-###
-class JSLiteral extends Literal
-	###
-	@param _pos [Pos]
-	@param _text [String]
-	###
-	constructor: (@_pos, @_text) ->
-		type @_pos, Pos, @_text, String
-
-	# @noDoc
-	toJS: ->
-		@_text
+	show: ->
+		@_value
 
 ###
 Contains many sub-`Token`s.
@@ -187,7 +134,6 @@ class Keyword extends Token
 				@_kind
 		"<#{x}>"
 
-
 ###
 Just the first part of a `use` statement.
 Eg from `use ..x for y`, this would just be `..x`.
@@ -231,23 +177,22 @@ class Use extends Token
 	show: ->
 		"use #{@path()}" ##{@_nLeadingDots}|#{@_parts}"
 
+# TODO: use this instead
+kind = (tokenType, kind, token) ->
+	token instanceof tokenType and token.kind() == kind
+
+kindTest = (tokenType) -> (kind) -> (token) ->
+	token instanceof tokenType and token.kind() == kind
 
 module.exports =
 	Group: Group
 	Keyword: Keyword
 	Literal: Literal
 	Name: Name
-	NumberLiteral: NumberLiteral
-	StringLiteral: StringLiteral
-	JSLiteral: JSLiteral
 	Token: Token
 	Use: Use
 
-	group: (kind) -> (token) ->
-		token instanceof Group and token.kind() == kind
-
-	keyword: (kind) -> (token) ->
-		token instanceof Keyword and token.kind() == kind
-
-	name: (kind) -> (token) ->
-		token instanceof Name and token.kind() == kind
+	group: kindTest Group
+	keyword: kindTest Keyword
+	literal: kindTest Literal
+	name: kindTest Name

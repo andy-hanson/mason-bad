@@ -1,8 +1,8 @@
 { cFail } = require '../compile-help/check'
 { mangle, needsMangle } = require '../compile-help/JavaScript-syntax'
 Pos = require '../compile-help/Pos'
-{ abstract, type, typeEach } = require '../help/check'
-{ interleave, last, rightUnCons  } = require '../help/list'
+{ abstract, check, type, typeEach } = require '../help/check'
+{ interleave, isEmpty, last, rightUnCons  } = require '../help/list'
 Expression = require './Expression'
 
 ###
@@ -15,10 +15,8 @@ module.exports = class BlockBody extends Expression
 		throw new Error "Should not be called!"
 
 	###
-	@return
-	  lines: Array[Chunk]
-	  madeRes: Boolean
-	    Whether `res` was written to.
+	Code that will write to 'res'
+	@return [Array[Chunk]]
 	###
 	makeRes: (context) ->
 		abstract()
@@ -114,8 +112,7 @@ class DictBody extends BlockBody
 				line.toNode context
 		lines.push [ 'var res = ', (genObjectLiteral @_keys, context.indent()) ]
 
-		lines: lines
-		madeRes: yes
+		lines
 
 	makeVoid: (context) ->
 		cFail @pos(), "Block contains dict keys and can not return Void."
@@ -131,19 +128,25 @@ class PlainBody extends BlockBody
 
 	# @noDoc
 	makeRes: (context) ->
-		lines =
-			@makeVoid context
-
-		if (last @_lines)?.pure()
-			[ leadIn, finish ] =
-				rightUnCons lines
-
-			leadIn.push [ 'var res = ', finish ]
-			lines: leadIn
-			madeRes: yes
+		if isEmpty @_lines
+			cFail @pos(), 'Block is not tagged `:Void` but has no value to return'
 		else
-			lines: lines
-			madeRes: no
+			[ leadIn, finish ] =
+				rightUnCons @_lines
+
+			lines = []
+			lines.push (leadIn.map (line) -> line.toNode context)...
+
+			res =
+				if finish.returnable()
+					finish.toNode context
+				else
+					lines.push finish.toNode context
+					finish.returner context
+
+			lines.push [ 'var res = ', res ]
+
+			lines
 
 	makeVoid: (context) ->
 		@_lines.map (line) ->

@@ -19,10 +19,6 @@ module.exports = class AssignSingle extends Expression
 		type @_value, Expression, @_isMutate, Boolean
 
 	# @noDoc
-	pure: ->
-		no
-
-	# @noDoc
 	compile: (context) ->
 		assignTo =
 			@_var.var().assignableCode context, @_isMutate
@@ -32,10 +28,18 @@ module.exports = class AssignSingle extends Expression
 			[ assignTo, ' =\n', context.indent(), '\t', val ]
 
 		check =
-			if @_var.hasType()
+			if (context.options().checks 'type') and @_var.hasType()
 				[ ';\n', context.indent(), @_var.typeCheck context ]
 			else
 				''
 
 		[ ass, check ]
 
+
+	# @noDoc
+	returnable: ->
+		no
+
+	# @noDoc
+	returner: (context) ->
+		@_var.var().toNode context

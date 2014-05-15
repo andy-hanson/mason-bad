@@ -3,16 +3,16 @@ Object.prototype.!subsumes = |a name
 	`if (!test) throw new Error(name + " is no " + this.name + ", it's " + a);`
 	()
 
-Function.prototype.subsumes? = |x
-	`x instanceof this`
+Function.prototype.subsumes? = |a:?
+	`a instanceof this`
 
-String.subsumes? = |a
+String.subsumes? = |a:?
 	`typeof a === "string"`
 
-Number.subsumes? = |a
+Number.subsumes? = |a:?
 	`typeof a === "number"`
 
-Boolean.subsumes? = |a
+Boolean.subsumes? = |a:?
 	`typeof a === "boolean"`
 
 Array.sub = |element-type
@@ -36,6 +36,9 @@ Dict. Object
 
 Fun. Function
 
+Fun.sub = |
+	Fun
+
 Int.
 	name. "Int"
 	subsumes?. |n
@@ -49,9 +52,47 @@ Nat.
 Real. Number
 
 Void.
-	subsumes?. |n
-		`n == null`
+	subsumes?. Function "a" "return a == null"
 
 Any.
-	subsumes?. |n
-		`n != null`
+	subsumes?. Function "a" "return a != null"
+
+of. |
+	Array.prototype.slice.call arguments
+
+
+?.
+	\ Must use Function constructor because writing `|a` generates an existence assertion!
+	exists?. Function "a" "return a != null"
+
+	subsumes?. Function "return true"
+
+	!subsumes. Function ""
+
+	sub. |type
+		subsumes?. |a:?
+			case a
+				exists? _
+					type.subsumes? a
+				else
+					`true`
+
+		!subsumes. |a:? name
+			case a
+				exists? _
+					type.!subsumes a name
+				else
+					()
+
+	\\\
+	force. |a:?
+		get-or a |
+			fail somehow
+
+	get-or. |a:? fall-back:Fun
+		case a
+			exists? _
+				_
+			else
+				do fall-back
+	\\\

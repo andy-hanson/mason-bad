@@ -21,6 +21,7 @@ module.exports =
 	Member: Member
 	JS: JS
 	ListElement: require './ListElement'
+	Literal: require './Literal'
 	Local: require './Local'
 	Quote: require './Quote'
 	Require: require './Require'
@@ -28,8 +29,8 @@ module.exports =
 	Type: require './Type'
 	TypedVariable: require './TypedVariable'
 
-	#null: (pos) ->
-	#	new JS pos, 'null'
+	null: (pos) ->
+		new JS pos, 'null'
 
 	sub: (pos, expr, subbed) ->
 		type pos, Pos, expr, Expression

@@ -50,6 +50,14 @@ module.exports = class Expression
 	###
 	Whether this Expression may appear within another
 	and be returned from functions.
+	@return [Boolean]
 	###
-	pure: ->
+	returnable: ->
 		yes
+
+	###
+	If I am not `returnable`, return this instead.
+	@return [Chunk]
+	###
+	returner: ->
+		abstract()

@@ -31,11 +31,6 @@ module.exports = class AssignDestructure extends Expression
 		for key of @_namesToVars
 			type @_namesToVars[key], TypedVariable
 		type @_value, Expression, @_isMutate, Boolean
-
-	# @noDoc
-	pure: ->
-		no
-
 	# @noDoc
 	compile: (context) ->
 		val =
@@ -62,3 +57,11 @@ module.exports = class AssignDestructure extends Expression
 			[ ';\n', context.indent() ]
 
 		[ refDef, nl, (interleave assigns, nl) ]
+
+	# @noDoc
+	returnable: ->
+		no
+
+	# @noDoc
+	returner: ->
+		cFail @pos(), 'Block can not end in destructuring assignment.'

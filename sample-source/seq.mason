@@ -1,0 +1,76 @@
+use .Option for Some None
+use .types for Any Bool Fun Nat of
+
+Seq.
+	subsumes?. |a
+		True
+
+use .methods for method implement
+
+\ TODO: iterator
+each. method
+	name. "each"
+	wrap. |seq use-element:Fun[of Any Int Void]
+		()
+
+fold. method
+	name. "fold"
+	check. |body seq initial folder:Fun[of Any Any Any]
+		doc
+			blah
+		in
+			blah
+		out
+			blah
+
+		do body
+
+
+	default. |seq initial folder
+		accumulator = initial
+		each seq |element
+			accumulator := folder accumulator element
+		accumulator
+
+\\\
+REQUIRES ITERATOR
+
+fold+.method
+	name. "fold+"
+	wrap. |seq folder:Fun[of Any Any Any]
+	default. |seq folder
+		accumulator =
+\\\
+
+map. method
+	name. "map"
+	wrap. |:Seq seq mapper:Fun[of Any Any]
+		()
+
+find-opt. method
+	name. "find"
+	wrap. |seq predicate:Fun[of Any Bool]
+		()
+
+size. method
+	name. "size"
+	wrap. |:Nat seq
+		()
+
+
+implement each Option map
+implement map Option |opt mapper
+	()
+
+implement each Array Array.prototype.forEach
+implement each String Array.prototype.forEach
+
+
+
+implement find-index-opt Array |array predicate
+	`for (var i = 0; i < array.length; ++i) if (predicate(array[i])) return Option.Some(i);`
+
+implement find Array |array predicate:Fun[of Any Bool]
+	map find-index-opt array |index
+		array[_.index]
+

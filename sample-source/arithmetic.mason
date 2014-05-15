@@ -1,4 +1,4 @@
-use .alias for Real
+use .types for Nat Int Real
 use .Bool for and
 use .comparisons for compare < == > <= >=
 use .js-util for identical?

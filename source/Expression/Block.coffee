@@ -29,10 +29,6 @@ module.exports = class Block extends Expression
 		typeEach @_inLines, Expression, @_outLines, Expression
 
 	# @noDoc
-	pure: ->
-		no
-
-	# @noDoc
 	compile: (context) ->
 		@withReturnType context, null
 
@@ -48,29 +44,32 @@ module.exports = class Block extends Expression
 		allLines =
 			[]
 
-		@_inLines.forEach (line) ->
-			allLines.push line.toNode context
+		if context.options().checks 'in'
+			@_inLines.forEach (line) ->
+				allLines.push line.toNode context
 
 		returns =
 			not (returnType? and returnType instanceof Type.VoidType)
 
 		{ lines, madeRes } =
 			if returns
-				@_body.makeRes context
+				lines: @_body.makeRes context
+				madeRes: yes
 			else
 				lines: @_body.makeVoid context
 				madeRes: no
 
 		allLines.push lines...
 
-		if returns and returnType?
+		if (context.options().checks 'type') and returns and returnType?
 			resVar =
 				new TypedVariable (Local.res @pos()), returnType
 
 			allLines.push resVar.typeCheck context
 
-		@_outLines.forEach (line) ->
-			allLines.push line.toNode context
+		if context.options().checks 'out'
+			@_outLines.forEach (line) ->
+				allLines.push line.toNode context
 
 		if madeRes
 			allLines.push [ 'return res' ]

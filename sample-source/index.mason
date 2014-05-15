@@ -2,98 +2,23 @@ use source-map-support
 source-map-support.install null
 log! = console.log
 
-use .?
+use .arithmetic for *
+use .js-util for do
+use .methods for method implement
 
-x:?[Number] = 3
-y:?[Number] = `undefined`
+a. method
+	name. "asdf"
+	check. |:Number impl subject
+		in
+			log! "in"
+		out
+			log! "out"
 
-log! x
-log! y
+		* 2 (do impl)
 
-z:?[Number] = "fourty-two"
+implement a String |
+	log! "mid"
+	2
 
-\\\
-use .Option for Some None force
+log! (a "three")
 
-log! (Option 3)
-log! (Option undefined)
-\\\
-
-\\\
-use .Bool for True False and or not nand nor xor
-use .arithmetic for + - * / < > abs
-use .control for ? if unless while times
-use .Vec2
-use .method for method implement
-
-
-
-size = method
-	name. "sizee"
-
-implement size Number |n
-	abs n
-
-implement size Array |arr
-	arr.length
-
-
-log! (size 3)
-log! (size
-	. 1
-	. 2
-)
-
-\\\
-
-
-\\\
-x = 4
-
-while |
-	> x 0
-|
-	log! x
-	x := - x 1
-
-times 3 |
-	log! "three times"
-\\\
-
-
-\\\
-v = Vec2.Vec2
-	x. 1
-	y. 2
-
-log! v
-log! (Vec2.+ v v)
-
-factorial = |a
-	case a
-		= -1
-			-1
-		< a 2
-			1
-		else
-			* a (factorial (- a 1))
-
-count-string. |a
-	case a
-		= 0
-			"none"
-		:Number
-			"lots"
-		else
-			"Not a Number, it's {a}!"
-
-log! (factorial 10)
-
-log! (count-string 0)
-log! (count-string 5)
-log! (count-string 15)
-log! (count-string (Vec2.Vec2
-	x. 1
-	y. 2
-))
-\\\

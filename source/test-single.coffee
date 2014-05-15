@@ -5,7 +5,7 @@ Options = require './Options'
 prelude = ''
 
 str = '''
-use x for y~z
+3.a b
 '''
 
 command =
@@ -15,6 +15,10 @@ options =
 	fileName: 'sample-in'
 	outFileName: 'sample-out'
 	prelude: prelude
+	checks:
+		types: no
+		in: no
+		out: no
 
 switch command
 	when 'tokens'

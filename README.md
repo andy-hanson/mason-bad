@@ -211,7 +211,9 @@ Multiple assignment
 ---
 
 If you write `a b = dict`, `a` will be `dict.a` and `b` will be `dict.b`.
+
 You can rename these: in `a~eh b~bee = dict`, `a` will be `dict.eh` and `b` will be `dict.bee`.
+
 This works with dict key assignment as well, e.g. `a b. dict`.
 
 
@@ -234,8 +236,8 @@ Use | Require
 Make Modules
 ---
 
-The value of a module is the result of running the code.
-Don't write to `module.exports` explicitly.
+A module is treated as a single expression.
+The value of that expression will be written to `module.exports`.
 
 
 

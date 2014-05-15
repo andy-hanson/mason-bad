@@ -35,6 +35,9 @@ module.exports = joinGroups = (tokens) ->
 	closeKinds =
 		[ ')', ']' ].concat blockCloseKinds
 
+	isOpenFun = ->
+		(last opens)?.kind() in [ '|', '@' ]
+
 	for token in tokens
 		if token instanceof GroupPre
 			pos = token.pos()
@@ -61,9 +64,15 @@ module.exports = joinGroups = (tokens) ->
 				fail()
 
 		else
+			if ((T.keyword '\n') token) and isOpenFun()
+				open = opens.pop()
+				finishLevel()
+				#current.push new T.Group token.pos(), '→', [ ]
+
 			if token instanceof T.Group # This happens if it's a quote
 				token =
 					new T.Group token.pos(), token.kind(), joinGroups token.body()
+
 			current.push token
 
 

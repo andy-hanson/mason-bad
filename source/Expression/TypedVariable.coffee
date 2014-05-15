@@ -37,6 +37,7 @@ module.exports = class TypedVariable extends Expression
 	###
 	typeCheck: (context) ->
 		check @hasType()
+		check context.options().checks 'type'
 		@_type.toCheck context, @_var, @_var.name()
 
 	@fromMaybeType: (_var, varType) ->

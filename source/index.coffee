@@ -12,7 +12,7 @@ Compile a single file.
 @return [{ code, map }]
 ###
 @compile = (source, options) ->
-	type source, String
+	type source, String, options, Object
 
 	compileSingle source, new Options options
 

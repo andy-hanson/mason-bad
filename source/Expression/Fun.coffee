@@ -47,17 +47,21 @@ module.exports = class Fun extends Expression
 		insideContext =
 			context.indented()
 		checks =
-			@_arguments.filter (arg) ->
-				arg.hasType()
-			.map (arg) ->
-				arg.typeCheck insideContext
-		cs =
-			interleavePlus checks, [ ';\n', insideContext.indent() ]
+			if context.options().checks 'type'
+				checksList =
+					@_arguments.filter (arg) ->
+						arg.hasType()
+					.map (arg) ->
+						arg.typeCheck insideContext
+
+				interleavePlus checksList, [ ';\n', insideContext.indent() ]
+			else
+				''
 		block =
 			@_block.withReturnType insideContext, @_returnType
 
 		[	'function(', args, ')\n',
 			context.indent(), '{\n', insideContext.indent(),
-			cs,
+			checks,
 			block,
 			'\n', context.indent(), '}' ]

@@ -18,8 +18,7 @@ module.exports = lexNumber = (str, pos) ->
 			Number numStr
 		cCheck (not Number.isNaN num), pos,
 			"Not a valid number: `#{str}`"
-		num
-
+		num.toString()
 
 	parts =
 		str.split '/'
