@@ -60,7 +60,7 @@ module.exports = (grunt) ->
 				#	prelude: 'sample-source/prelude.mason'
 
 		exec:
-			sample: 'node sample-js'
+			sample: 'node --harmony sample-js'
 
 
 	(require 'load-grunt-tasks') grunt

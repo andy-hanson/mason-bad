@@ -27,11 +27,11 @@ module.exports = class Local extends Assignable
 		mangle @name()
 
 	# @noDoc
-	assignableCode: (context, isMutate) ->
+	assignableCode: (context, isMutate, kind) ->
 		if isMutate
 			mangle @name()
 		else
-			[ 'var ', mangle @name() ]
+			[ 'const ', mangle @name() ]
 
 	###
 	Local for the result of blocks.

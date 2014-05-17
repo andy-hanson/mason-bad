@@ -2,6 +2,7 @@ use .methods for method
 
 compare. method
 	name. "compare"
+	\check. |:Bool a b
 
 ==. method
 	name. "=="

@@ -10,9 +10,10 @@ module.exports = (parse) ->
 	Parse an entire case statement.
 	@return [Case]
 	###
-	parse.case = (pos, tokens) ->
+	parse.case = (pos, tokens, isValue) ->
 		type pos, Pos
 		typeEach tokens, T.Token
+		type isValue, Boolean
 
 		[ casedTokens, block ] =
 			parse.takeIndentedFromEnd pos, tokens
@@ -31,7 +32,7 @@ module.exports = (parse) ->
 			cCheck part instanceof E.CasePart, part.pos(),
 				'Can only have `else` at end of case'
 
-		new E.Case pos, cased, parts, elze
+		new E.Case pos, cased, parts, elze, isValue
 
 	###
 	Parse a single test and resulting block within a case statement.

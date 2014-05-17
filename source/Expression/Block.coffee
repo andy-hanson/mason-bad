@@ -32,10 +32,13 @@ module.exports = class Block extends Expression
 	compile: (context) ->
 		@withReturnType context, null
 
+	toVoid: (context, pos) ->
+		@withReturnType context, Type.Void pos
+
 	###
 	Compile this block optionally with the given return type.
 	@param context [Context]
-	@param returnType [String?]
+	@param returnType [TypeD?]
 	###
 	withReturnType: (context, returnType) ->
 		type context, Context
@@ -49,7 +52,7 @@ module.exports = class Block extends Expression
 				allLines.push line.toNode context
 
 		returns =
-			not (returnType? and returnType instanceof Type.VoidType)
+			not (returnType instanceof Type.VoidType)
 
 		{ lines, madeRes } =
 			if returns
@@ -73,7 +76,5 @@ module.exports = class Block extends Expression
 
 		if madeRes
 			allLines.push [ 'return res' ]
-		else
-			allLines.push [ 'return' ]
 
 		interleave allLines, [ ';\n', context.indent() ]

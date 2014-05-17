@@ -1,4 +1,9 @@
-javaScriptKeywords = "
+use .js-util for new
+
+lines = |str
+	str.split "\n"
+
+javaScriptKeywords = new Set lines "
 	abstract
 	arguments
 	boolean
@@ -61,13 +66,11 @@ javaScriptKeywords = "
 	while
 	with
 
-javaScriptKeywords := javaScriptKeywords.split "\n"
-
 illegalJavaScriptNameChar = `/[^a-zA-Z0-9_]/g`
 
 |name:String
 	case name
-		`javaScriptKeywords.indexOf(_) !== -1`
+		javaScriptKeywords.has _
 			"_{name}"
 		else
 			name.replace illegalJavaScriptNameChar |ch

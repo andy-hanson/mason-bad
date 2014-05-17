@@ -48,11 +48,15 @@ Maps group openers to closers.
 
 @keywords = [
 	'case',
+	'case!'
 	'else',
 	'use',
 	'for',
 	'in',
 	'out',
+	'var',
+	'loop!',
+	'break!',
 	'=',
 	':='
 	'.',

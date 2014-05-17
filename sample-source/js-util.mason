@@ -18,11 +18,11 @@ new. |constructor:Function \TODO: ...args
 	doc
 		Calls `new` on the constructor with the given arguments.
 
-	boundConstructor = constructor.bind constructor (arguments.slice 1)
+	boundConstructor = constructor.bind constructor (Array.prototype.slice.call `arguments` 1)
 	`new boundConstructor`
 
 send. |object name:String \ TODO: ...args
 	doc
 		Calls `object`'s method `name` with the given arguments.
 
-	(property object name).apply object (arguments.slice 2)
+	(property object name).apply object (Array.prototype.slice.call `arguments` 2)

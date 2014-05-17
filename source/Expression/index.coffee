@@ -11,6 +11,7 @@ module.exports =
 	Block: require './Block'
 	BlockBody: require './BlockBody'
 	BlockWrap: require './BlockWrap'
+	Break: require './Break'
 	Call: Call
 	Case: require './Case'
 	CasePart: require './CasePart'
@@ -23,11 +24,13 @@ module.exports =
 	ListElement: require './ListElement'
 	Literal: require './Literal'
 	Local: require './Local'
+	Loop: require './Loop'
 	Quote: require './Quote'
 	Require: require './Require'
 	This: require './This'
 	Type: require './Type'
 	TypedVariable: require './TypedVariable'
+	VarDeclare: require './VarDeclare'
 
 	null: (pos) ->
 		new JS pos, 'null'

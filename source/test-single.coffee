@@ -5,7 +5,9 @@ Options = require './Options'
 prelude = ''
 
 str = '''
-3.a b
+case x
+	else
+		3
 '''
 
 command =

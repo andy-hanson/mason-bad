@@ -3,6 +3,7 @@ Pos = require '../compile-help/Pos'
 Block = require './Block'
 CaseTest = require './CaseTest'
 Expression = require './Expression'
+Type = require './Type'
 
 ###
 A single possible match in a case expression.
@@ -25,16 +26,19 @@ module.exports = class CasePart extends Expression
 	`cased` is passed in by the `Case` I am a part of.
 	@return [Chunk]
 	###
-	compile: (context) ->
+	toPart: (context, theCase) ->
 		test =
 			@_test.toNode context
 		blockContext =
 			context.indented()
 		block =
-			@_block.toNode blockContext
+			@_block.withReturnType blockContext, theCase.returnType()
+		unless theCase.isValue()
+			block = [ block, ';\n', blockContext.indent(), 'break' ]
 
-		[	'if (', test, ')\n',
-			context.indent(), '{\n',
-			blockContext.indent(), block, '\n',
-			context.indent(), '}' ]
+		[
+			'case ', test, ':\n',
+			blockContext.indent(), block, '\n'
+		]
+
 

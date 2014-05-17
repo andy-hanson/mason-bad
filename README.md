@@ -1,4 +1,4 @@
-mason
+Mason
 ---
 
 	mason. language
@@ -8,7 +8,7 @@ mason
 		status.
 			"nowhere near ready"
 		compile-to.
-			"JavaScript"
+			"JavaScript (`node --harmony`)"
 
 
 
@@ -190,20 +190,22 @@ With `case` you can branch based on the value of a variable.
 				"Exactly {_}."
 			not (truthy? _)
 				"Bupkis!"
-			:String, :Array, has-property? _ "length"
+			:String, :Array
 				count-string _.length
 			else
 				"lots"
 
 To test equality, use `=`.
 
-For a type test, write the type name preceded by `:`. (This calls `subsumes?`, not `!subsumes`.)
+For a type test, just write the type. (This calls `subsumes?`, not `!subsumes`.)
 
 To do any other test, just write your expression on the line. `_` is the value you `case` on.
 
-If you want to handle many cases the same way, use `,`:
+To handle many cases the same way, use `,`:
 
-If you don't provide an `else` case and no test matches, it throws an error.
+If you don't provide `else` and no test matches, it throws an error.
+
+If you don't want it to return a value, use `case!` instead.
 
 
 
@@ -319,6 +321,34 @@ Comments
 
 	doc
 		Docstring. This should go at the start of a function.
+
+
+
+Var
+---
+
+You can declare and alter imperative variables. `var` creates a new one, and subsequent alterations use `:=`.
+If you use `=` instead the compiler should complain (but this isn't implemented yet).
+
+	var a := 0
+	a := 1 \ Changed my mind!
+
+
+
+Loop!
+---
+
+Sometimes you get the itch to use an imperative loop. `loop!` and `break!` to the rescue!
+
+	\ Counts down from 10 to 1.
+	var n := 10
+	loop!
+		case! n
+			positive? _
+				log! n
+				n := decrement n
+			else
+				break!
 
 
 

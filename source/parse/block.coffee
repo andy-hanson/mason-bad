@@ -1,7 +1,7 @@
 { cCheck } = require '../compile-help/check'
 Pos = require '../compile-help/Pos'
 { type, typeEach } = require '../help/check'
-{ isEmpty, splitWhere, tail, trySplitOnceWhere, unCons } = require '../help/list'
+{ isEmpty, last, splitWhere, tail, trySplitOnceWhere, unCons } = require '../help/list'
 E = require '../Expression'
 T = require '../Token'
 
@@ -115,7 +115,8 @@ module.exports = (parse) ->
 		lines.forEach (line) =>
 			if (T.name '.x') line[0]
 				# It's a call on the previous line
-				if (isEmpty lineExprs) or not (last lineExprs).pure()
+
+				if (isEmpty lineExprs) or not (last lineExprs).returnable()
 					unexpected line[0]
 				else
 					prev =
@@ -146,18 +147,42 @@ module.exports = (parse) ->
 		type pos, Pos
 		typeEach tokens, T.Token
 
+		t0 = tokens[0]
 		unless isEmpty tokens
-			pos = tokens[0].pos()
+			pos = t0.pos()
 
 		isAssign = (x) ->
 			((T.keyword '=') x) or ((T.keyword '.') x) or (T.keyword ':=') x
 
-		if tokens[0] instanceof T.Use
+		if t0 instanceof T.Use
 			content: parse.use pos, tokens
 			newKeys: [ ]
 
-		else if (T.keyword '.') tokens[0]
-			content: new E.ListElement tokens[0].pos(), parse.expression pos, tail tokens
+		else if (T.keyword 'case!') t0
+			content: parse.case pos, (tail tokens), no
+			newKeys: [ ]
+
+		else if (T.keyword 'loop!') t0
+			[ b4, inLoop ] =
+				parse.takeIndentedFromEnd pos, tail tokens
+			cCheck (isEmpty b4), pos, 'Did not expect anything after `loop`'
+			content: new E.Loop pos, (parse.block pos, inLoop)
+			newKeys: [ ]
+
+		else if (T.keyword 'break!') t0
+			cCheck (isEmpty tail tokens), pos, 'Did not expect anything after `break!`'
+			content: new E.Break pos
+			newKeys: [ ]
+
+		else if (T.keyword 'var') t0
+			declared =
+				parse.typedVariables pos, tail tokens
+
+			content: new E.VarDeclare pos, declared
+			newKeys: [ ]
+
+		else if (T.keyword '.') t0
+			content: new E.ListElement pos, parse.expression pos, tail tokens
 			newKeys: [ ]
 
 		else if (splitted = trySplitOnceWhere tokens, isAssign)?

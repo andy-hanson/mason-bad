@@ -15,7 +15,7 @@ module.exports = (parse) ->
 		typeEach tokens, T.Token
 
 		if (T.keyword 'case') tokens[0]
-			parse.case tokens[0].pos(), tail tokens
+			parse.case tokens[0].pos(), (tail tokens), yes
 		else
 			parts =
 				parse.expressionParts pos, tokens
@@ -99,11 +99,11 @@ module.exports = (parse) ->
 					when '@'
 						new E.This token.pos()
 					else
-						unexpected token
+						parse.unexpected token
 
 			else
 				if token instanceof T.Literal
 					new E.Literal token.pos(), token.kind(), token.value()
 				else
-					unexpected token
+					parse.unexpected token
 

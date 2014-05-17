@@ -1,23 +1,34 @@
+use .js-help for do
+use .methods for method implement
 use .Option for Some None
 use .types for Any Bool Fun Nat of
+
 
 Seq.
 	subsumes?. |a
 		True
 
-use .methods for method implement
+
+iterator. method
+	name. "iterator"
+
+implement iterator Array
+	`function*(arr) { for (var i = 0; i < arr.length; ++i) yield arr[i]; }`
+
+
 
 \ TODO: iterator
 each. method
 	name. "each"
-	wrap. |seq use-element:Fun[of Any Int Void]
-		()
+	check. |body seq use-element:Fun[of Any Int Void]
+		do body
 
 fold. method
+	doc
+		blah
+
 	name. "fold"
 	check. |body seq initial folder:Fun[of Any Any Any]
-		doc
-			blah
 		in
 			blah
 		out

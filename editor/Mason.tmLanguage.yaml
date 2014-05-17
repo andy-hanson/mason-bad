@@ -7,6 +7,14 @@ uuid: 857c9cc3-2862-4a05-87e7-115318008707
 
 patterns:
 
+- comment: A language keyword.
+  name: keyword
+  match: (^|\s)(use|for|case!?|else|in|out|res|_|loop!|break!|<-|←)\s
+
+- comment: JavaScript literal
+  name: support.other
+  match: "`[^`]*`"
+
 - comment: Bracket
   name: skeyword
   match: "[\\(\\[\\{\\}\\]\\)]"
@@ -49,10 +57,6 @@ patterns:
     comment: Interpolation
     match: \{[^\}]*\}
 
-- comment: JavaScript literal
-  name: support.other
-  match: "`[^`]*`"
-
 
 - comment: Docstring
   name: entity.other
@@ -65,8 +69,7 @@ patterns:
     '1':
       name: keyword
 
-- name: keyword
-  match: \b(use|for|case|else|in|out|res|_)\b
+
 - comment: \@ on its own or before a property
   name: keyword
   match: \@

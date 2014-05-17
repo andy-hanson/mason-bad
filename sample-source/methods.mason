@@ -11,7 +11,7 @@ make-dispatcher = |name:String
 				arguments[0]['{name}'];
 			if (implementation == null)
 				throw new Error("Method `{name}` not implemented for " + arguments[0])
-			implementation.apply(null, arguments);
+			return implementation.apply(null, arguments);
 		}
 
 	(Fun make-it-code) ()

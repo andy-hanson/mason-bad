@@ -2,6 +2,23 @@ use source-map-support
 source-map-support.install null
 log! = console.log
 
+use .methods for implement
+use .arithmetic for decrement -
+use .comparisons for compare >
+
+
+var n
+n := 10
+loop!
+	case! n
+		> _ 0
+			n := decrement n
+			log! n
+		else
+			break!
+log! "Bai"
+
+\\\
 use .arithmetic for *
 use .js-util for do
 use .methods for method implement
@@ -21,4 +38,4 @@ implement a String |
 	2
 
 log! (a "three")
-
+\\\
