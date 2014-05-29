@@ -4,43 +4,44 @@ Pos = require '../compile-help/Pos'
 { isEmpty, last, rightUnCons } = require '../help/list'
 E = require '../Expression'
 T = require '../Token'
+ParseContext = require './ParseContext'
 
 module.exports = (parse) ->
 	###
 	Parse a function header and body.
 	(The body is parsed by Parser.block().)
 	###
-	parse.fun = (pos, tokens, preserveThis) ->
-		type pos, Pos
+	parse.fun = (context, tokens, preserveThis) ->
+		type context, ParseContext
 		typeEach tokens, T.Token
 		type preserveThis, Boolean
 
 		[ argTokens, blockTokens ] =
 			if (T.group '→') last tokens
-				parse.takeIndentedFromEnd pos, tokens
+				parse.takeIndentedFromEnd context, tokens
 			else
 				[ tokens, [ ] ]
 		body =
-			parse.block pos, blockTokens
+			parse.block context, blockTokens
 		t0 =
 			argTokens[0]
 		[ returnType, tokensAfterReturnType ] =
 			if ((T.name ':x') t0) and t0.text() == 'Void'
 				[ (E.Type.Void t0.pos()), tail argTokens ]
 			else
-				parse.tryTakeType pos, argTokens, yes
+				parse.tryTakeType context, argTokens, yes
 		args =
-			parse.typedVariables pos, tokensAfterReturnType
+			parse.typedVariables context, tokensAfterReturnType
 
-		new E.Fun pos, returnType, args, body, preserveThis
-
+		new E.Fun context.pos(), returnType, args, body, preserveThis
 
 	###
 	`tokens` *should* end in an indented block.
 	@return [ Array<Token>, Array<Token> ]
 	  All but the last token, and the body of the indented block.
 	###
-	parse.takeIndentedFromEnd = (pos, tokens) ->
+	parse.takeIndentedFromEnd = (context, tokens) ->
+		type context, ParseContext
 		typeEach tokens, T.Token
 
 		if isEmpty tokens
@@ -49,12 +50,10 @@ module.exports = (parse) ->
 		else
 			[ before, block ] =
 				rightUnCons tokens
-			cCheck ((T.group '→') block), pos, ->
+			cCheck ((T.group '→') block), context.pos(), ->
 				"Expected to end in block, not #{block}"
 
 			[ before, block.body() ]
-
-
 
 	###
 	Throws a compiler error when a bad token is encountered.
@@ -67,8 +66,8 @@ module.exports = (parse) ->
 	Parses a `use` line.
 	@return [AssignSingle | AssignDestructure]
 	###
-	parse.use = (pos, tokens) ->
-		type pos, Pos
+	parse.use = (context, tokens) ->
+		type context, ParseContext
 		typeEach tokens, T.Token
 
 		use = tokens[0]
@@ -96,6 +95,6 @@ module.exports = (parse) ->
 				"Expected 'for', got #{_for}"
 
 			{ _, names, _ } =
-				parse.maybeRenamedVariables pos, whatFor, isDictAssign
+				parse.maybeRenamedVariables context, whatFor, isDictAssign
 
 			new E.AssignDestructure use.pos(), names, used, isMutate

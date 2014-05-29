@@ -4,24 +4,25 @@ Pos = require '../compile-help/Pos'
 { isEmpty, tail, unCons } = require '../help/list'
 E = require '../Expression'
 T = require '../Token'
+ParseContext = require './ParseContext'
 
 module.exports = (parse) ->
 	###
 	Parses a pure expression.
 	@return [Expression]
 	###
-	parse.expression = (pos, tokens) ->
-		type pos, Pos
+	parse.expression = (context, tokens) ->
+		type context, ParseContext
 		typeEach tokens, T.Token
 
 		if (T.keyword 'case') tokens[0]
-			parse.case tokens[0].pos(), (tail tokens), yes
+			parse.case (context.withPos tokens[0].pos()), (tail tokens), yes
 		else
 			parts =
-				parse.expressionParts pos, tokens
+				parse.expressionParts context, tokens
 
 			if isEmpty parts
-				E.true pos
+				E.true context.pos()
 			else
 				[ e0, rest ] =
 					unCons parts
@@ -36,8 +37,8 @@ module.exports = (parse) ->
 	Eg `a.b (c d) e.f` has 3 parts: `a.b`, `(c d)`, and `e.f`.
 	@return [Array<Expression>]
 	###
-	parse.expressionParts = (pos, tokens) ->
-		type pos, Pos
+	parse.expressionParts = (context, tokens) ->
+		type context, ParseContext
 		typeEach tokens, T.Token
 
 		parts = [ ]
@@ -51,11 +52,15 @@ module.exports = (parse) ->
 						if isDotName
 							new E.Member token.pos(), popped, token.text()
 						else
-							E.sub token.pos(), popped, parse.expressionParts token.pos(), token.body()
+							newContext =
+								context.withPos token.pos()
+							E.sub token.pos(), popped, parse.expressionParts newContext, token.body()
 					else
 						unexpected token
 				else
-					parseSoloExpression token
+					newContext =
+						context.withPos token.pos()
+					parseSoloExpression newContext, token
 
 			parts.push x if x?
 
@@ -65,7 +70,8 @@ module.exports = (parse) ->
 	###
 	Parses a single token which *should* be a pure expression of its own.
 	###
-	parseSoloExpression = (token) ->
+	parseSoloExpression = (context, token) ->
+		type context, ParseContext
 		type token, T.Token
 
 		switch token.constructor
@@ -79,18 +85,20 @@ module.exports = (parse) ->
 						unexpected token
 
 			when T.Group
-				pos = token.pos()
+				newContext =
+					context.withPos token.pos()
 				body = token.body()
 
 				switch token.kind()
 					when '|', '@|'
-						parse.fun pos, body, token.kind() == '@|'
+						parse.fun newContext, body, token.kind() == '@|'
 					when '('
-						parse.expression pos, body
+						parse.expression newContext, body
 					when '→'
-						new E.BlockWrap pos, parse.block pos, body
+						new E.BlockWrap newContext.pos(), parse.block newContext, body
 					when '"'
-						new E.Quote pos, body.map parseSoloExpression
+						new E.Quote newContext.pos(), body.map (token) ->
+							parseSoloExpression (context.withPos token.pos()), token
 					else
 						fail()
 

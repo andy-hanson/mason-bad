@@ -4,13 +4,15 @@ Pos = require '../compile-help/Pos'
 { isEmpty, tail } = require '../help/list'
 E = require '../Expression'
 T = require '../Token'
+ParseContext = require './ParseContext'
 
 module.exports = (parse) ->
 	###
 	Read in a local variable from a `Name`.
 	@return [Local or JS]
 	###
-	parse.local = (token) ->
+	parseLocal = (context, token) ->
+		type context, ParseContext
 		type token, T.Token
 
 		if (T.literal 'javascript') token
@@ -23,8 +25,8 @@ module.exports = (parse) ->
 			new E.Local token.pos(), token.text()
 
 
-	parse.maybeRenamedVariables = (pos, tokens, isDictAssign) ->
-		type pos, Pos
+	parse.maybeRenamedVariables = (context, tokens, isDictAssign) ->
+		type context, ParseContext
 		typeEach tokens, T.Token
 		type isDictAssign, Boolean
 
@@ -34,7 +36,7 @@ module.exports = (parse) ->
 
 		until isEmpty tokens
 			local =
-				parse.local tokens[0]
+				parseLocal (context.withPos tokens[0].pos()), tokens[0]
 			tokens = tail tokens
 
 			_var = local
@@ -49,7 +51,7 @@ module.exports = (parse) ->
 					tokens = tail tokens
 
 			[ varType, tokens ] =
-				parse.tryTakeType pos, tokens
+				parse.tryTakeType context, tokens
 
 			typedVar =
 				E.TypedVariable.fromMaybeType _var, varType
@@ -57,7 +59,7 @@ module.exports = (parse) ->
 			vars.push typedVar
 
 			[ rename, tokens ] =
-				tryTakeRename pos, tokens
+				tryTakeRename context, tokens
 
 			if rename?
 				anyRenames = yes
@@ -70,8 +72,8 @@ module.exports = (parse) ->
 		anyRenames: anyRenames
 
 
-	tryTakeRename = (pos, tokens) ->
-		type pos, Pos
+	tryTakeRename = (context, tokens) ->
+		type context, ParseContext
 		typeEach tokens, T.Token
 
 		if ((T.name '~x') tokens[0])
@@ -83,25 +85,24 @@ module.exports = (parse) ->
 	###
 	@return [Array<TypedVariable>]
 	###
-	parse.typedVariables = (pos, tokens) ->
-		type pos, Pos
+	parse.typedVariables = (context, tokens) ->
+		type context, ParseContext
 		typeEach tokens, T.Token
 
 		{ vars, _, anyRenames } =
-			parse.maybeRenamedVariables pos, tokens, no
+			parse.maybeRenamedVariables context, tokens, no
 
-		cCheck (not anyRenames), pos,
+		cCheck (not anyRenames), context.pos(),
 			'Did not expect rename'
 
 		vars
 
 	###
-	@param pos [Pos]
 	@param tokens [Array<Token>]
 	@return [ Type?, Array<Token> ]
 	###
-	parse.tryTakeType = (pos, tokens) ->
-		type pos, Pos
+	parse.tryTakeType = (context, tokens) ->
+		type context, ParseContext
 		typeEach tokens, T.Token
 
 		t0 =
@@ -114,12 +115,12 @@ module.exports = (parse) ->
 				tokens[1]
 
 			if (T.group '[') t1
-				pos =
-					t1.pos()
+				context =
+					context.withPos t1.pos()
 				subbed =
-					parse.expressionParts pos, t1.body()
+					parse.expressionParts context, t1.body()
 				sub =
-					E.sub pos, local, subbed
+					E.sub context.pos(), local, subbed
 				tipe =
 					E.Type.Expression sub
 				[ tipe, tokens.slice 2 ]

@@ -1,6 +1,7 @@
 { typeEach } = require '../help/check'
 E = require '../Expression'
 T = require '../Token'
+ParseContext = require './ParseContext'
 
 parser = { }
 (require './block') parser
@@ -15,8 +16,9 @@ Parses the whole file.
 parseAll = (tokens) ->
 	typeEach tokens, T.Token
 
-	pos = tokens[0].pos()
-	new E.BlockWrap pos, parser.block pos, tokens
+	context =
+		new ParseContext tokens[0].pos()
+	new E.BlockWrap context.pos(), parser.block context, tokens
 
 ###
 Finds the `Expression` that the `tokens` represent.
